@@ -36,7 +36,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="EyeXFramework">
-      <HintPath>..\..\..\..\..\Downloads\TobiiEyeXSdk-DotNet-1.8.498\lib\x64\EyeXFramework.dll</HintPath>
+      <HintPath>..\Tobii DLL\lib\x64\EyeXFramework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -50,7 +50,7 @@
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
     <Reference Include="Tobii.EyeX.Client.Net20">
-      <HintPath>..\..\..\..\..\Downloads\TobiiEyeXSdk-DotNet-1.8.498\lib\x64\Tobii.EyeX.Client.Net20.dll</HintPath>
+      <HintPath>..\Tobii DLL\lib\x64\Tobii.EyeX.Client.Net20.dll</HintPath>
     </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
@@ -105,8 +105,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\..\..\..\..\Downloads\TobiiEyeXSdk-DotNet-1.8.498\lib\x64\Tobii.EyeX.Client.dll">
-      <Link>Tobii.EyeX.Client.dll</Link>
+    <Content Include="Tobii.EyeX.Client.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
