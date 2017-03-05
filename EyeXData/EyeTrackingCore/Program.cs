@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Xml.Serialization;
 
-using EyeTracking;
+using EyeTrackingCore;
 
 namespace ConsoleApplication
 {
     public class Program
     {
-        static private List<EyeTracking.GazePoint> points = new List<EyeTracking.GazePoint>();
+        static private List<GazePoint> points = new List<GazePoint>();
         static private XmlSerializer serialiser = new XmlSerializer(points.GetType());
 
         public static void Main(string[] args)

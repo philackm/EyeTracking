@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EyeXDataCollector", "EyeXData\EyeXDataCollector.csproj", "{CBBFC420-853E-4739-8010-A82C8046EBD6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EyeXDataCollector", "EyeXDataCollector\EyeXDataCollector.csproj", "{CBBFC420-853E-4739-8010-A82C8046EBD6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EyeFixationDrawer", "EyeFixationDrawer\EyeFixationDrawer.csproj", "{467CADA2-C921-4E36-9AF3-0787827486D6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fixation", "Fixation\Fixation.csproj", "{60B2A23E-964B-4C0F-B9C5-AA833004ED29}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EyeTrackingCore", "EyeTrackingCore\EyeTrackingCore.csproj", "{60B2A23E-964B-4C0F-B9C5-AA833004ED29}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

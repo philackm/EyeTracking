@@ -69,9 +69,6 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="EyeTracking\Fixation.cs" />
-    <Compile Include="EyeTracking\GazePoint.cs" />
-    <Compile Include="EyeTracking\RawToFixationConverter.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -110,9 +107,9 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Fixation\Fixation.csproj">
+    <ProjectReference Include="..\EyeTrackingCore\EyeTrackingCore.csproj">
       <Project>{60b2a23e-964b-4c0f-b9c5-aa833004ed29}</Project>
-      <Name>Fixation</Name>
+      <Name>EyeTrackingCore</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

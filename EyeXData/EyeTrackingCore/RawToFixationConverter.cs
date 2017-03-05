@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace EyeTracking {
+namespace EyeTrackingCore {
 
     public class RawToFixationConverter {
         
@@ -40,16 +40,14 @@ namespace EyeTracking {
                 differences[i] = difference;
             }
 
-            int count = 0;
-            /*
             // Testing
             Console.WriteLine("Differences:");
+            int count = 0;
             foreach(float difference in differences) {
                 Console.Write(count++ + ":" + difference + ", ");
             }
             Console.Write("\n");
             // End Testing
-            */
 
             // 3: create peak vector and find peaks (that is, find the large(est) differences in means of the sliding windows)
             // Create the array to store the differences in the windows for each point.
@@ -65,7 +63,6 @@ namespace EyeTracking {
                 }
             }
 
-            /*
             // Testing
             Console.WriteLine("Peaks:");
             count = 0;
@@ -74,7 +71,6 @@ namespace EyeTracking {
             }
             Console.Write("\n");
             // End Testing
-            */
 
             // 4: remove peaks that are too close to each other (only want the largest difference per sliding window)
             for(int i = windowSize; i <= (rawPoints.Count - windowSize) - 1; i++) {
@@ -94,7 +90,6 @@ namespace EyeTracking {
                 }
             }
 
-            /*
             /// Testing
             Console.WriteLine("Peaks after removing nearby peaks:");
             count = 0;
@@ -103,7 +98,6 @@ namespace EyeTracking {
             }
             Console.Write("\n");
             // End Testing
-            */
 
             // 5: create list with the indices of the peaks in the peak vector
             //      only add the peaks greater than some threshold, this works the same as a naieve algorithm, we only consider it a saccade if the distance is over a vertain threshold.
@@ -115,7 +109,6 @@ namespace EyeTracking {
                 }
             }
 
-            /*
             /// Testing
             Console.WriteLine("Peak Indices");
             count = 0;
@@ -124,7 +117,6 @@ namespace EyeTracking {
             }
             Console.Write("\n");
             // End Testing
-            */
 
             // 6a: estimate the spacial position of all the fixations between candidate saccades (peaks)                  
             //      use the geometric median of all the raw points 

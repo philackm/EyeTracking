@@ -7,8 +7,8 @@
     <ProjectGuid>{60B2A23E-964B-4C0F-B9C5-AA833004ED29}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Fixation</RootNamespace>
-    <AssemblyName>Fixation</AssemblyName>
+    <RootNamespace>EyeTrackingCore</RootNamespace>
+    <AssemblyName>EyeTrackingCore</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

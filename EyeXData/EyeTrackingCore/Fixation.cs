@@ -1,4 +1,6 @@
-namespace EyeTracking {
+using System;
+
+namespace EyeTrackingCore {
 
     public class Fixation {
 

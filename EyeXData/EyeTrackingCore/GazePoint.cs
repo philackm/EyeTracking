@@ -1,6 +1,6 @@
 using System;
 
-namespace EyeTracking {
+namespace EyeTrackingCore {
 
     public struct Point {
         public float x;

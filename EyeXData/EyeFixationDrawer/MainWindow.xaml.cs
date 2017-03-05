@@ -1,22 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Xml.Serialization;
 
-using EyeXFramework;
-using Tobii.EyeX.Framework;
-using EyeTracking;
+using EyeXFramework; // Tobii
+using Tobii.EyeX.Framework; // Tobii
+
+using EyeTrackingCore; // From EyeTrackingCore project reference
 
 namespace EyeFixationDrawer
 {
@@ -59,7 +52,7 @@ namespace EyeFixationDrawer
 
         private void StoreGazePoint(object sender, GazePointEventArgs args)
         {
-            GazePoint gazePoint = new EyeTracking.GazePoint((float)args.X, (float)args.Y, 0);
+            GazePoint gazePoint = new GazePoint((float)args.X, (float)args.Y, 0);
             gazePoints.Add(gazePoint);
         }
 
