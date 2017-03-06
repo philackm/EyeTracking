@@ -28,6 +28,7 @@ namespace EyeFixationDrawer
         // TODO: Saccades
 
         // UI Representations of the fixations and saccades.
+        private List<Ellipse> gazeCircles = new List<Ellipse>();
         private List<Ellipse> fixationCircles = new List<Ellipse>();
         private List<Line> saccades = new List<Line>();
 
@@ -35,9 +36,9 @@ namespace EyeFixationDrawer
         private XmlSerializer serialiser;
 
         // Fixation algorithm arguments
-        private int currentWindowSize = 25;
-        private double peakThreshold = 25;
-        private double radius = 25;
+        private int currentWindowSize = 12;
+        private double peakThreshold = 50;
+        private double radius = 10;
 
         // Determines the maximum settable by the UI
         private int maxWindowSize = 100;
@@ -89,6 +90,24 @@ namespace EyeFixationDrawer
             DrawCircle(args.X, args.Y, System.Windows.Media.Brushes.Black, 5);
         }
 
+        private void DrawAllGazePoints()
+        {
+            foreach (GazePoint gazePoint in gazePoints)
+            {
+                DrawCircle(gazePoint.x, gazePoint.y, System.Windows.Media.Brushes.Black, 5);
+            }
+        }
+
+        private void ClearGazePoints()
+        {
+            foreach (Ellipse ellipse in gazeCircles)
+            {
+                canvas.Children.Remove(ellipse);
+            }
+
+            gazeCircles.Clear();
+        }
+
         // Fixations
         private void DrawFixations()
         {
@@ -114,10 +133,16 @@ namespace EyeFixationDrawer
                 Canvas.SetLeft(ellipse, canvasXY.X);
                 Canvas.SetTop(ellipse, canvasXY.Y);
 
+                // This is absolutey horrible, needs to change.
                 if (brush == System.Windows.Media.Brushes.Red)
                 {
                     fixationCircles.Add(ellipse);
                 }
+                else if(brush == System.Windows.Media.Brushes.Black)
+                {
+                    gazeCircles.Add(ellipse);
+                }
+
                 canvas.Children.Add(ellipse);
             }));
         }
@@ -263,16 +288,69 @@ namespace EyeFixationDrawer
         private void SaveData_Click(object sender, RoutedEventArgs e)
         {
             Console.WriteLine("Saving Data...");
+
+            System.IO.FileStream fileStream = new System.IO.FileStream("./gazePoints.xml", System.IO.FileMode.OpenOrCreate);
+
             try
-            {
-                System.IO.FileStream stream = new System.IO.FileStream("./gazePoints.xml", System.IO.FileMode.OpenOrCreate);
-                this.serialiser.Serialize(stream, gazePoints);
+            {    
+                this.serialiser.Serialize(fileStream, gazePoints);
             }
             catch (Exception exception)
             {
                 Console.WriteLine(exception.Message);
             }
+            finally
+            {
+                fileStream.Close();
+            }
+
             Console.WriteLine("Save complete!");
+        }
+
+        private void LoadData_Click(object sender, RoutedEventArgs e)
+        {
+            // Create OpenFileDialog 
+            Microsoft.Win32.OpenFileDialog openFileDialog = new Microsoft.Win32.OpenFileDialog();
+
+            // Set filter for file extension and default file extension 
+            openFileDialog.DefaultExt = ".xml";
+            openFileDialog.Filter = "XML Files (*.xml)|*.xml";
+
+            // Display OpenFileDialog by calling ShowDialog method 
+            Nullable<bool> result = openFileDialog.ShowDialog();
+
+            // Get the selected file name and display in a TextBox 
+            if (result == true)
+            {
+                // Open document 
+                string filename = openFileDialog.FileName;
+                System.IO.FileStream fileStream = new System.IO.FileStream(filename, System.IO.FileMode.Open);
+
+                try
+                {
+                    this.gazePoints = this.serialiser.Deserialize(fileStream) as List<GazePoint>;
+
+                    // Clear anything that is on the canvas.
+                    ClearGazePoints();
+                    RemoveFixationCircles();
+                    RemoveSaccades();
+
+                    // Draw the data we just loaded in.
+                    DrawAllGazePoints();
+                    //DrawFixations();
+                    //DrawSaccades();
+
+                }
+                catch (Exception exception)
+                {
+                    Console.WriteLine(exception.Message);
+                }
+                finally
+                {
+                    fileStream.Close();
+                }
+                
+            }
         }
     }
 }
