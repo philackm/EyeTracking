@@ -18,24 +18,41 @@ namespace EyeFixationDrawer
     /// </summary>
     public partial class MainWindow : Window
     {
+        // Access to the Tobii eyeX
         private EyeXHost _eyeXHost;
         private GazePointDataStream stream;
 
+        // GazePoints, Fixations & Saccades
         private List<GazePoint> gazePoints = new List<GazePoint>();
+        // TODO: Fixations
+        // TODO: Saccades
+
+        // UI Representations of the fixations and saccades.
+        private List<Ellipse> fixationCircles = new List<Ellipse>();
+        private List<Line> saccades = new List<Line>();
+
+        // Loading/Saving Data
         private XmlSerializer serialiser;
 
-        private List<Ellipse> fixationSpheres = new List<Ellipse>();
-        private List<Line> saccades = new List<Line>();
+        // Fixation algorithm arguments
+        private int currentWindowSize = 25;
+        private double peakThreshold = 25;
+        private double radius = 25;
+
+        // Determines the maximum settable by the UI
+        private int maxWindowSize = 100;
+        private double maxPeakThreshold = 1000;
+        private double maxRadius = 1000;
+
+        // Initialisation
+        // ##############
 
         public MainWindow()
         {
             InitializeComponent();
             serialiser = new XmlSerializer(gazePoints.GetType());
-            //InitEyeTracker();
 
             InitSliders();
-
-            button.Click += delegate (object s, RoutedEventArgs e) { InitEyeTracker(); };
         }
 
         private void InitEyeTracker()
@@ -46,8 +63,15 @@ namespace EyeFixationDrawer
 
             // Create a data stream object and listen to events. 
             stream = _eyeXHost.CreateGazePointDataStream(GazePointDataMode.Unfiltered);
-            stream.Next += DrawSphereAtGazePoint;
+            stream.Next += DrawCircleAtGazePoint;
             stream.Next += StoreGazePoint;
+        }
+
+        private void InitSliders()
+        {
+            windowSizeSlider.Value = (float)currentWindowSize / (float)maxWindowSize;
+            peakThresholdSlider.Value = peakThreshold / maxPeakThreshold;
+            radiusSlider.Value = radius / maxRadius;
         }
 
         private void StoreGazePoint(object sender, GazePointEventArgs args)
@@ -56,12 +80,28 @@ namespace EyeFixationDrawer
             gazePoints.Add(gazePoint);
         }
 
-        private void DrawSphereAtGazePoint(object sender, GazePointEventArgs args)
+        // Drawing / Updating UI
+        // #####################
+
+        // Gaze Points
+        private void DrawCircleAtGazePoint(object sender, GazePointEventArgs args)
         {
-            DrawSphere(args.X, args.Y, System.Windows.Media.Brushes.Black, 5);
+            DrawCircle(args.X, args.Y, System.Windows.Media.Brushes.Black, 5);
         }
 
-        private void DrawSphere(double screenX, double screenY, SolidColorBrush brush, double size)
+        // Fixations
+        private void DrawFixations()
+        {
+            RawToFixationConverter converter = new RawToFixationConverter(gazePoints);
+            List<Fixation> fixations = converter.CalculateFixations(currentWindowSize, (float)peakThreshold, (float)radius);
+
+            foreach (Fixation fixation in fixations)
+            {
+                DrawCircle(fixation.x, fixation.y, System.Windows.Media.Brushes.Red, 20);
+            }
+        }
+
+        private void DrawCircle(double screenX, double screenY, SolidColorBrush brush, double size)
         {
             this.Dispatcher.Invoke((Action)(() =>
             {
@@ -74,27 +114,36 @@ namespace EyeFixationDrawer
                 Canvas.SetLeft(ellipse, canvasXY.X);
                 Canvas.SetTop(ellipse, canvasXY.Y);
 
-                if(brush == System.Windows.Media.Brushes.Red)
+                if (brush == System.Windows.Media.Brushes.Red)
                 {
-                    fixationSpheres.Add(ellipse);
+                    fixationCircles.Add(ellipse);
                 }
                 canvas.Children.Add(ellipse);
             }));
         }
 
-        private void RemoveFixationSpheres()
+        private void RemoveFixationCircles()
         {
-            foreach (Ellipse ellipse in fixationSpheres)
+            foreach (Ellipse ellipse in fixationCircles)
             {
                 canvas.Children.Remove(ellipse);
             }
         }
+
+        private void UpdateFixationCircles()
+        {
+            RemoveFixationCircles();
+            RemoveSaccades();
+            DrawFixation_Click(this, null);
+        }
+
+        // Saccades
         private void DrawSaccades()
         {
-            for (int i = 1; i < fixationSpheres.Count; i++)
+            for (int i = 1; i < fixationCircles.Count; i++)
             {
-                Ellipse from = fixationSpheres[i - 1];
-                Ellipse to = fixationSpheres[i];
+                Ellipse from = fixationCircles[i - 1];
+                Ellipse to = fixationCircles[i];
 
                 double startX = Canvas.GetLeft(from);
                 double startY = Canvas.GetTop(from);
@@ -125,6 +174,7 @@ namespace EyeFixationDrawer
             }
         }
 
+        // Helper method that converts a point in screen space to canvas space.
         private System.Windows.Point ScreenToCanvas(System.Windows.Point screenPosition)
         {
             double windowX = 0;
@@ -142,101 +192,83 @@ namespace EyeFixationDrawer
             return new System.Windows.Point(X, Y);
         }
 
-        // SaveData button
-        private void button1_Click(object sender, RoutedEventArgs e)
+        // Events
+        // ######
+
+        // Start collecting gaze data button
+        private void Start_Click(object sender, RoutedEventArgs e)
         {
-            Console.WriteLine("Saving Data");
+            InitEyeTracker();
+        }
+
+        // Stop collecting gaze data button
+        private void Stop_Click(object sender, RoutedEventArgs e)
+        {
+            stream.Next -= DrawCircleAtGazePoint;
+            stream.Next -= StoreGazePoint;
+        }
+
+        // Draw fixation button
+        private void DrawFixation_Click(object sender, RoutedEventArgs e)
+        {
+            DrawFixations();
+            DrawSaccades();
+        }
+
+        // Clear fixation button
+        private void ClearFixation_Click(object sender, RoutedEventArgs e)
+        {
+            RemoveFixationCircles();
+            RemoveSaccades();
+        }
+
+        // Window size slider changed
+        private void WindowSize_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            currentWindowSize = (int)(e.NewValue * maxWindowSize);
+            windowSizeLabel.Content = "Window size: " + currentWindowSize;
+
+            UpdateFixationCircles();
+        }
+
+        // Peak threshold slider changed
+        private void PeakThreshold_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            peakThreshold = e.NewValue * maxPeakThreshold;
+            peakThresholdLabel.Content = "Peak Threshold: " + peakThreshold;
+
+            UpdateFixationCircles();
+        }
+
+        // Radius slider changed
+        private void Radius_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            radius = e.NewValue * maxRadius;
+            radiusLabel.Content = "Radius: " + radius;
+
+            UpdateFixationCircles();
+        }
+
+        // Saving / Loading
+        // ################
+
+        // TODO: Add loading functionality.
+
+        // SaveData button
+        // Currently just saves the raw gaze points out to an xml file in the same directory as the executable.
+        private void SaveData_Click(object sender, RoutedEventArgs e)
+        {
+            Console.WriteLine("Saving Data...");
             try
             {
-                System.IO.FileStream stream = new System.IO.FileStream("C:/Users/philm/Desktop/gazePoints.xml", System.IO.FileMode.OpenOrCreate);
+                System.IO.FileStream stream = new System.IO.FileStream("./gazePoints.xml", System.IO.FileMode.OpenOrCreate);
                 this.serialiser.Serialize(stream, gazePoints);
             }
             catch (Exception exception)
             {
                 Console.WriteLine(exception.Message);
             }
+            Console.WriteLine("Save complete!");
         }
-
-        // StopCollectingButton
-        private void button2_Click(object sender, RoutedEventArgs e)
-        {
-            stream.Next -= DrawSphereAtGazePoint;
-            stream.Next -= StoreGazePoint;
-        }
-
-        // Draw fixation button
-        private void button3_Click(object sender, RoutedEventArgs e)
-        {
-            RawToFixationConverter converter = new RawToFixationConverter(gazePoints);
-            List<Fixation> fixations = converter.CalculateFixations(currentWindowSize, (float)peakThreshold, (float)radius);
-
-            foreach(Fixation fixation in fixations)
-            {
-                DrawSphere(fixation.x, fixation.y, System.Windows.Media.Brushes.Red, 20);
-            }
-
-            DrawSaccades();
-        }
-
-        // Clear fixation button
-        private void button4_Click(object sender, RoutedEventArgs e)
-        {
-            RemoveFixationSpheres();
-            RemoveSaccades();
-        }
-
-        private int maxWindowSize = 100;
-        private double maxPeakThreshold = 1000;
-        private double maxRadius = 1000;
-
-        private int currentWindowSize = 25;
-        private double peakThreshold = 25;
-        private double radius = 25;
-
-        private void InitSliders()
-        {
-            slider1.Value = (float)currentWindowSize / (float)maxWindowSize;
-            slider2.Value = peakThreshold / maxPeakThreshold;
-            slider3.Value = radius / maxRadius;
-
-            Console.WriteLine(slider1.Value);
-        }
-
-        // Window size changed
-        private void slider1_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            currentWindowSize = (int)(e.NewValue * maxWindowSize);
-            label.Content = "Window size: " + currentWindowSize;
-            Console.WriteLine(currentWindowSize);
-
-            UpdateFixationSpheres();
-        }
-
-        // Peak threshold changed
-        private void slider2_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            peakThreshold = e.NewValue * maxPeakThreshold;
-            label1.Content = "Peak Threshold: " + peakThreshold;
-
-            UpdateFixationSpheres();
-        }
-
-        // Radius changed
-        private void slider3_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            radius = e.NewValue * maxRadius;
-            label2.Content = "Radius: " + radius;
-
-            UpdateFixationSpheres();
-        }
-
-        private void UpdateFixationSpheres()
-        {
-            RemoveFixationSpheres();
-            RemoveSaccades();
-            button3_Click(this, null);
-        }
-
-
     }
 }

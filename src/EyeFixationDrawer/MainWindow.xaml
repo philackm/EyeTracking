@@ -8,17 +8,17 @@
         Title="MainWindow" Height="350" Width="525">
     <Grid>
         <Canvas Margin="0" Name="canvas">
-            <Button x:Name="button1" Content="SaveData" Canvas.Left="10" Canvas.Top="59" Width="75" Click="button1_Click"/>
-            <Button x:Name="button2" Content="Stop" Canvas.Left="10" Canvas.Top="34" Width="75" Click="button2_Click"/>
-            <Button x:Name="button3" Content="Draw Fixations" Canvas.Left="10" Canvas.Top="84" Width="100" Click="button3_Click"/>
-            <Slider x:Name="slider1" Canvas.Left="10" Canvas.Top="140" Width="149" ValueChanged="slider1_ValueChanged" Maximum="1"/>
-            <Slider x:Name="slider2" Canvas.Left="10" Canvas.Top="188" Width="149" Maximum="1" ValueChanged="slider2_ValueChanged"/>
-            <Slider x:Name="slider3" Canvas.Left="10" Canvas.Top="233" Width="149" Maximum="1" ValueChanged="slider3_ValueChanged"/>
-            <Label x:Name="label" Content="Window Size" Canvas.Left="10" Canvas.Top="114"/>
-            <Label x:Name="label1" Content="Peak Threshold" Canvas.Left="10" Canvas.Top="162"/>
-            <Label x:Name="label2" Content="Radius" Canvas.Left="10" Canvas.Top="207"/>
-            <Button x:Name="button4" Content="Clear Fixations" Canvas.Left="121" Canvas.Top="84" Width="75" Click="button4_Click"/>
+            <Button x:Name="startButton" Content="Start" Canvas.Left="10" Canvas.Top="10" Width="75" Click="Start_Click"/>
+            <Button x:Name="stopButton" Content="Stop" Canvas.Left="10" Canvas.Top="34" Width="75" Click="Stop_Click"/>
+            <Button x:Name="saveDataButton" Content="SaveData" Canvas.Left="10" Canvas.Top="59" Width="75" Click="SaveData_Click"/>
+            <Button x:Name="drawFixationButton" Content="Draw Fixations" Canvas.Left="10" Canvas.Top="84" Width="100" Click="DrawFixation_Click"/>
+            <Button x:Name="clearFixationButton" Content="Clear Fixations" Canvas.Left="121" Canvas.Top="84" Width="100" Click="ClearFixation_Click"/>
+            <Slider x:Name="windowSizeSlider" Canvas.Left="10" Canvas.Top="140" Width="149" ValueChanged="WindowSize_ValueChanged" Maximum="1"/>
+            <Slider x:Name="peakThresholdSlider" Canvas.Left="10" Canvas.Top="188" Width="149" Maximum="1" ValueChanged="PeakThreshold_ValueChanged"/>
+            <Slider x:Name="radiusSlider" Canvas.Left="10" Canvas.Top="233" Width="149" Maximum="1" ValueChanged="Radius_ValueChanged"/>
+            <Label x:Name="windowSizeLabel" Content="Window Size" Canvas.Left="10" Canvas.Top="114"/>
+            <Label x:Name="peakThresholdLabel" Content="Peak Threshold" Canvas.Left="10" Canvas.Top="162"/>
+            <Label x:Name="radiusLabel" Content="Radius" Canvas.Left="10" Canvas.Top="207"/>
         </Canvas>
-        <Button x:Name="button" Content="Start" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="75"/>
     </Grid>
 </Window>
