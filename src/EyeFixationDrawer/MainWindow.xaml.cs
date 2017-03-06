@@ -128,6 +128,8 @@ namespace EyeFixationDrawer
             {
                 canvas.Children.Remove(ellipse);
             }
+
+            fixationCircles.Clear();
         }
 
         private void UpdateFixationCircles()
@@ -172,6 +174,8 @@ namespace EyeFixationDrawer
             {
                 canvas.Children.Remove(line);
             }
+
+            saccades.Clear();
         }
 
         // Helper method that converts a point in screen space to canvas space.
