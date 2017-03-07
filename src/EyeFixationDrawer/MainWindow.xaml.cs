@@ -36,7 +36,7 @@ namespace EyeFixationDrawer
         private XmlSerializer serialiser;
 
         // Fixation algorithm arguments
-        private int currentWindowSize = 12;
+        private int currentWindowSize = 13;
         private double peakThreshold = 50;
         private double radius = 10;
 
@@ -44,6 +44,11 @@ namespace EyeFixationDrawer
         private int maxWindowSize = 100;
         private double maxPeakThreshold = 1000;
         private double maxRadius = 1000;
+
+        // UI Specifics
+        private double fixationCircleSize = 20;
+        private double gazePointCircleSize = 5;
+        private double saccadeLineWidth = 2;
 
         // Initialisation
         // ##############
@@ -87,7 +92,7 @@ namespace EyeFixationDrawer
         // Gaze Points
         private void DrawCircleAtGazePoint(object sender, GazePointEventArgs args)
         {
-            DrawCircle(args.X, args.Y, System.Windows.Media.Brushes.Black, 5);
+            DrawCircle(args.X, args.Y, System.Windows.Media.Brushes.Black, gazePointCircleSize);
         }
 
         private void DrawAllGazePoints()
@@ -116,7 +121,7 @@ namespace EyeFixationDrawer
 
             foreach (Fixation fixation in fixations)
             {
-                DrawCircle(fixation.x, fixation.y, System.Windows.Media.Brushes.Red, 20);
+                DrawCircle(fixation.x, fixation.y, System.Windows.Media.Brushes.Red, fixationCircleSize);
             }
         }
 
@@ -172,11 +177,11 @@ namespace EyeFixationDrawer
                 Ellipse from = fixationCircles[i - 1];
                 Ellipse to = fixationCircles[i];
 
-                double startX = Canvas.GetLeft(from);
-                double startY = Canvas.GetTop(from);
+                double startX = Canvas.GetLeft(from) + (fixationCircleSize / 2);
+                double startY = Canvas.GetTop(from) + (fixationCircleSize / 2);
 
-                double endX = Canvas.GetLeft(to);
-                double endY = Canvas.GetTop(to);
+                double endX = Canvas.GetLeft(to) + (fixationCircleSize / 2);
+                double endY = Canvas.GetTop(to) + (fixationCircleSize / 2);
 
                 System.Windows.Shapes.Line line = new System.Windows.Shapes.Line();
                 line.X1 = startX;
@@ -185,7 +190,7 @@ namespace EyeFixationDrawer
                 line.X2 = endX;
                 line.Y2 = endY;
 
-                line.StrokeThickness = 2;
+                line.StrokeThickness = saccadeLineWidth;
                 line.Stroke = System.Windows.Media.Brushes.Red;
 
                 saccades.Add(line);
