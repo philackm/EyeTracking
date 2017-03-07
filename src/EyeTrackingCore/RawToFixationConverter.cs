@@ -41,12 +41,14 @@ namespace EyeTrackingCore {
             }
 
             // Testing
+            /*
             Console.WriteLine("Differences:");
             int count = 0;
             foreach(float difference in differences) {
                 Console.Write(count++ + ":" + difference + ", ");
             }
             Console.Write("\n");
+            */
             // End Testing
 
             // 3: create peak vector and find peaks (that is, find the large(est) differences in means of the sliding windows)
@@ -64,12 +66,14 @@ namespace EyeTrackingCore {
             }
 
             // Testing
+            /*
             Console.WriteLine("Peaks:");
             count = 0;
             foreach(float peak in peaks) {
                 Console.Write(count++ + ":" + peak + ", ");
             }
             Console.Write("\n");
+            */
             // End Testing
 
             // 4: remove peaks that are too close to each other (only want the largest difference per sliding window)
@@ -90,13 +94,15 @@ namespace EyeTrackingCore {
                 }
             }
 
-            /// Testing
+            // Testing
+            /*
             Console.WriteLine("Peaks after removing nearby peaks:");
             count = 0;
             foreach(float peak in peaks) {
                 Console.Write(count++ + ":" + peak + ", ");
             }
             Console.Write("\n");
+            */
             // End Testing
 
             // 5: create list with the indices of the peaks in the peak vector
@@ -109,13 +115,15 @@ namespace EyeTrackingCore {
                 }
             }
 
-            /// Testing
+            // Testing
+            /*
             Console.WriteLine("Peak Indices");
             count = 0;
             foreach(float index in peakIndices) {
                 Console.Write(count++ + ":" + index + ", ");
             }
             Console.Write("\n");
+            */
             // End Testing
 
             // 6a: estimate the spacial position of all the fixations between candidate saccades (peaks)                  
@@ -176,18 +184,19 @@ namespace EyeTrackingCore {
                 }
             }
 
-            /// Testing
+            // Testing
+            /*
             Console.WriteLine("Fixations:");
             count = 0;
             foreach(Fixation fixation in fixations) {
                 Console.Write(count++ + ":" + fixation.x + "," + fixation.y + ", ");
             }
             Console.Write("\n");
+            */
             // End Testing
 
             return fixations;
         }
-
 
         private List<Point> ConvertGazePointsToPoints(List<GazePoint> gazePoints) {
             List<Point> newPoints = new List<Point>();
@@ -218,21 +227,12 @@ namespace EyeTrackingCore {
                 Point numeratorSum = new Point(0, 0);
                 float denominatorSum = 0;
 
-
                 // BUG: When p is the same as previous (that is, one of the estimates from
                 // a previous round happens to be the same as another point in the set of points
                 // then the algorithm returns NaN because 'differenceMagnitude' becomes 0, then p/differenceMagnitude
                 // = 1 / 0 which is NaN/Inf). To solve this, add a tiny value to the point when it is the same as the previous round.
 
-                foreach(Point p in points){
-                    /*
-                    Console.WriteLine("\n");
-                    Console.WriteLine("Starting new point...");
-                    Console.WriteLine("=====================");
-                    Console.WriteLine("previous:" + previous.x + "," + previous.y);
-                    Console.WriteLine("current:" + p.x + "," + p.y);
-                    Console.WriteLine("pminusedprev:" + p.Minused(previous).x + "," + p.Minused(previous).y);
-                    */
+                foreach(Point p in points) {
 
                     if(p.Equals(previous)) {
                         p.Add(new Point(epsilon, epsilon));
@@ -242,17 +242,12 @@ namespace EyeTrackingCore {
                     Point quotient = p.Divided(differenceMagnitude);
                     numeratorSum.Add(quotient);
 
-                    //Console.WriteLine("differenceMagnitude:" + differenceMagnitude);
                     denominatorSum += 1 / differenceMagnitude;
-                    //Console.WriteLine("denominatorSum:" + denominatorSum);
                 }
 
                 next = numeratorSum.Divided(denominatorSum);
-                
             }
             while(previous.Minused(next).Magnitude() > epsilon);
-
-            Console.WriteLine("Took " + loops +" loops.");
             return next;
         }
 
