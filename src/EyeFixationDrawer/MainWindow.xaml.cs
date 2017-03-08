@@ -6,6 +6,8 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Xml.Serialization;
 
+using System.Timers;
+
 using EyeXFramework; // Tobii
 using Tobii.EyeX.Framework; // Tobii
 
@@ -50,6 +52,8 @@ namespace EyeFixationDrawer
         private double gazePointCircleSize = 5;
         private double saccadeLineWidth = 2;
 
+        private double startTime;
+
         // Initialisation
         // ##############
 
@@ -59,6 +63,9 @@ namespace EyeFixationDrawer
             serialiser = new XmlSerializer(gazePoints.GetType());
 
             InitSliders();
+
+            // Make note of when we started recording.
+            startTime = GetUnixMillisecondsForNow();
         }
 
         private void InitEyeTracker()
@@ -82,8 +89,14 @@ namespace EyeFixationDrawer
 
         private void StoreGazePoint(object sender, GazePointEventArgs args)
         {
-            GazePoint gazePoint = new GazePoint((float)args.X, (float)args.Y, 0);
+            int elapsedMilliseconds = (int)(GetUnixMillisecondsForNow() - startTime);
+            GazePoint gazePoint = new GazePoint((float)args.X, (float)args.Y, elapsedMilliseconds);
             gazePoints.Add(gazePoint);
+        }
+
+        private double GetUnixMillisecondsForNow()
+        {
+            return (DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalMilliseconds;
         }
 
         // Drawing / Updating UI

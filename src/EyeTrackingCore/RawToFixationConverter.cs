@@ -179,7 +179,6 @@ namespace EyeTrackingCore {
                             Console.WriteLine("index:" + index);
                             Console.WriteLine(peakIndices.Count);
                         }
-                        
                     }
                 }
             }
