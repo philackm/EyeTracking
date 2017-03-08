@@ -33,6 +33,7 @@ namespace EyeFixationDrawer
         private List<Ellipse> gazeCircles = new List<Ellipse>();
         private List<Ellipse> fixationCircles = new List<Ellipse>();
         private List<Line> saccades = new List<Line>();
+        private List<TextBlock> fixationTimeLabels = new List<TextBlock>();
 
         // Loading/Saving Data
         private XmlSerializer serialiser;
@@ -134,7 +135,11 @@ namespace EyeFixationDrawer
 
             foreach (Fixation fixation in fixations)
             {
+                double lengthOfFixation = fixation.endTime - fixation.startTime;
+                double seconds = lengthOfFixation / 1000;
+
                 DrawCircle(fixation.x, fixation.y, System.Windows.Media.Brushes.Red, fixationCircleSize);
+                DrawLabel(seconds.ToString(), fixation.x + fixationCircleSize, fixation.y, System.Windows.Media.Brushes.Red);
             }
         }
 
@@ -179,7 +184,39 @@ namespace EyeFixationDrawer
         {
             RemoveFixationCircles();
             RemoveSaccades();
+            RemoveLabels();
             DrawFixation_Click(this, null);
+        }
+
+        private void DrawLabel(String text, double x, double y, System.Windows.Media.Brush brush)
+        {
+            System.Windows.Point canvasLocation = ScreenToCanvas(new System.Windows.Point(x, y));
+
+            TextBlock textBlock = new TextBlock();
+            textBlock.Text = text;
+            textBlock.FontWeight = FontWeight.FromOpenTypeWeight(999);
+            textBlock.Foreground = brush;
+
+            Canvas.SetLeft(textBlock, canvasLocation.X);
+            Canvas.SetTop(textBlock, canvasLocation.Y);
+
+            fixationTimeLabels.Add(textBlock);
+            canvas.Children.Add(textBlock);
+        }
+
+        private void RemoveLabels()
+        {
+            RemoveElements<TextBlock>(fixationTimeLabels);
+        }
+
+        private void RemoveElements<T>(List<T> elements)
+        {
+            foreach (T element in elements)
+            {
+                canvas.Children.Remove(element as UIElement);
+            }
+
+            elements.Clear();
         }
 
         // Saccades
@@ -267,6 +304,7 @@ namespace EyeFixationDrawer
         {
             RemoveFixationCircles();
             RemoveSaccades();
+            RemoveLabels();
         }
 
         // Window size slider changed

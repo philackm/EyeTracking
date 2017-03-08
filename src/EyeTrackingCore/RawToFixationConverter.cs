@@ -144,13 +144,15 @@ namespace EyeTrackingCore {
                     int rawFromIndex = peakIndices[i-1];
                     int rawToIndex = peakIndices[i];
 
-                    List<Point> points = new List<Point>();
+                    List<GazePoint> points = new List<GazePoint>();
                     for(int rawIndex = rawFromIndex; rawIndex <= rawToIndex; rawIndex++) {
-                        points.Add(allPoints[rawIndex]);
+                        points.Add(rawPoints[rawIndex]);
                     }
 
-                    Point median = GeometricMedian(points);
-                    Fixation fixation = new Fixation(median.x, median.y, 0);
+                    Point median = GeometricMedian(ConvertGazePointsToPoints(points));
+                    int startTime = points[0].timestamp;
+                    int endTime = points[points.Count - 1].timestamp;
+                    Fixation fixation = new Fixation(median.x, median.y, startTime, endTime);
                     fixations.Add(fixation);
                 }
 

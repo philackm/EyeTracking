@@ -2,7 +2,7 @@ using System;
 
 namespace EyeTrackingCore {
 
-    public struct Point {
+    public class Point {
         public float x;
         public float y;
 
@@ -52,25 +52,17 @@ namespace EyeTrackingCore {
         }
     }
 
-    public class GazePoint {
+    public class GazePoint : Point {
 
-        public float x;
-        public float y;
-
-        public double timestamp; // milliseconds since start of tracking
+        public int timestamp; // milliseconds since start of tracking
         public bool exists; // don't think this is actually needed with tobii eyex
 
-        public GazePoint() {
-            this.x = 0;
-            this.y = 0;
+        public GazePoint() : base(0, 0) {
             this.timestamp = 0;
             this.exists = false;
         }
 
-        public GazePoint(float x, float y, double timestamp) {
-            this.x = x;
-            this.y = y;
-
+        public GazePoint(float x, float y, int timestamp) : base(x, y) {
             this.timestamp = timestamp;
             this.exists = true;
         }

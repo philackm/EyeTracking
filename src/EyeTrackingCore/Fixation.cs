@@ -7,12 +7,14 @@ namespace EyeTrackingCore {
         public float x;
         public float y;
 
-        private double length; // length of the fixation in milliseconds
+        public int startTime;  // The start time of the fixation in milliseconds
+        public int endTime;    // The end time of the fixation in milliseconds
 
-        public Fixation(float x, float y, double length) {
+        public Fixation(float x, float y, int startTime, int endTime) {
             this.x = x;
             this.y = y;
-            this.length = length;
+            this.startTime = startTime;
+            this.endTime = endTime;
         }
     }
 }
