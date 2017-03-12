@@ -45,8 +45,8 @@ namespace EyeFixationDrawer
 
         // Determines the maximum settable by the UI
         private int maxWindowSize = 100;
-        private double maxPeakThreshold = 1000;
-        private double maxRadius = 1000;
+        private double maxPeakThreshold = 200;
+        private double maxRadius = 200;
 
         // UI Specifics
         private double fixationCircleSize = 20;
@@ -407,6 +407,12 @@ namespace EyeFixationDrawer
                 }
                 
             }
+        }
+
+        private void featureSelectionButton_Click(object sender, RoutedEventArgs e)
+        {
+            Window featureExtractionWindow = new FeatureExtractionWindow();
+            featureExtractionWindow.Show();
         }
     }
 }
