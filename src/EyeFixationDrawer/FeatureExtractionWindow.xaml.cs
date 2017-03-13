@@ -17,6 +17,9 @@ using System.Data;
 
 using EyeTrackingCore;
 
+using MathNet.Numerics.LinearRegression;
+using MathNet.Numerics.Statistics;
+
 namespace EyeFixationDrawer
 {
     /// <summary>
@@ -58,11 +61,11 @@ namespace EyeFixationDrawer
         {
             List<FeatureExtractor> items = new List<FeatureExtractor>();
 
-            items.Add(new FeatureExtractor() { featureName = "Fixation Duration (mean)", include = true, action = FixationDuration });
-            items.Add(new FeatureExtractor() { featureName = "feature 2", include = true, action = (List<Fixation> fixations) => 2 });
-            items.Add(new FeatureExtractor() { featureName = "feature 3", include = false, action = (List<Fixation> fixations) => 3 });
-            items.Add(new FeatureExtractor() { featureName = "feature 4", include = true, action = (List<Fixation> fixations) => 4 });
-            items.Add(new FeatureExtractor() { featureName = "feature 5", include = false, action = (List<Fixation> fixations) => 5 });
+            items.Add(new FeatureExtractor() { featureName = "Fixation Duration (mean)", include = true, action = FixationDurationMean });
+            items.Add(new FeatureExtractor() { featureName = "Fixation Duration (variance)", include = true, action = FixationDurationVariance });
+            items.Add(new FeatureExtractor() { featureName = "Fixation Duration (standard deviation)", include = true, action = FixationDurationStandardDeviation });
+            items.Add(new FeatureExtractor() { featureName = "Fixation Rate (per second)", include = true, action = FixationRatePerSecond });
+            items.Add(new FeatureExtractor() { featureName = "Fixation Slope", include = true, action = FixationSlope });
             items.Add(new FeatureExtractor() { featureName = "feature 6", include = true, action = (List<Fixation> fixations) => 6 });
             items.Add(new FeatureExtractor() { featureName = "feature 7", include = false, action = (List<Fixation> fixations) => 7 });
             items.Add(new FeatureExtractor() { featureName = "feature 8", include = true, action = (List<Fixation> fixations) => 8 });
@@ -91,9 +94,8 @@ namespace EyeFixationDrawer
 
             return featuresToExtract;
         }
-
-
-        private double FixationDuration(List<Fixation> fixations)
+        
+        private double FixationDurationMean(List<Fixation> fixations)
         {
             double sum = 0;
             int fixationCount = 1;
@@ -105,6 +107,51 @@ namespace EyeFixationDrawer
             }
 
             return sum / fixationCount;
+        }
+
+        private double FixationDurationVariance(List<Fixation> fixations)
+        {
+            List<Double> durations = new List<Double>();
+
+            foreach (var fixation in fixations)
+            {
+                var duration = fixation.endTime - fixation.startTime;
+                durations.Add(duration);
+            }
+
+            return Statistics.Variance(durations);
+        }
+
+        private double FixationDurationStandardDeviation(List<Fixation> fixations)
+        {
+            return Math.Sqrt(FixationDurationVariance(fixations));
+        }
+
+        private double FixationRatePerSecond(List<Fixation> fixations)
+        {
+            int numberOfFixations = fixations.Count;
+
+            int startTime = fixations[0].startTime;
+            int endTime = fixations[numberOfFixations - 1].endTime;
+
+            double totalTimeInSeconds = (endTime - startTime) / 1000;
+
+            return numberOfFixations / totalTimeInSeconds;
+        }
+
+        private double FixationSlope(List<Fixation> fixations)
+        {
+            List<Tuple<double, double>> samples = new List<Tuple<double, double>>();
+
+            foreach (var fixation in fixations)
+            {
+                Tuple<double, double> sample = new Tuple<double, double>(fixation.x, fixation.y);
+                samples.Add(sample);
+            }
+
+            Tuple<double, double> result = SimpleRegression.Fit(samples);
+
+            return result.Item2;
         }
     }
 }
