@@ -26,6 +26,7 @@ namespace EyeFixationDrawer
 
         // GazePoints, Fixations & Saccades
         private List<GazePoint> gazePoints = new List<GazePoint>();
+        private List<Fixation> calculatedFixations = new List<Fixation>();
         // TODO: Fixations
         // TODO: Saccades
 
@@ -132,6 +133,7 @@ namespace EyeFixationDrawer
         {
             RawToFixationConverter converter = new RawToFixationConverter(gazePoints);
             List<Fixation> fixations = converter.CalculateFixations(currentWindowSize, (float)peakThreshold, (float)radius);
+            calculatedFixations = fixations;
 
             foreach (Fixation fixation in fixations)
             {
@@ -411,7 +413,7 @@ namespace EyeFixationDrawer
 
         private void featureSelectionButton_Click(object sender, RoutedEventArgs e)
         {
-            Window featureExtractionWindow = new FeatureExtractionWindow();
+            Window featureExtractionWindow = new FeatureExtractionWindow(calculatedFixations);
             featureExtractionWindow.Show();
         }
     }

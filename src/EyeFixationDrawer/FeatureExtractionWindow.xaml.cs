@@ -25,22 +25,24 @@ namespace EyeFixationDrawer
     public partial class FeatureExtractionWindow : Window
     {
         private ObservableCollection<FeatureExtractor> list = new ObservableCollection<FeatureExtractor>();
+        private List<Fixation> currentlyLoadedFixations;
 
-        public FeatureExtractionWindow()
+        public FeatureExtractionWindow(List<Fixation> fixations)
         {
             InitializeComponent();
             InitFeatureList();
 
+            this.currentlyLoadedFixations = fixations;
             this.Closing += FeatureExtractionWindow_Closing;
         }
 
         private void FeatureExtractionWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             List<FeatureExtractor> extractors = GetFeatures();
-            List<Fixation> tempFixations = new List<Fixation>();
+            
             foreach (var extractor in extractors)
             {
-                Console.Write(extractor.action(tempFixations) + ",");
+                Console.Write(extractor.action(currentlyLoadedFixations) + ",");
             }
             Console.Write("\n");
         }
@@ -55,7 +57,7 @@ namespace EyeFixationDrawer
         private void InitFeatureList()
         {
             List<FeatureExtractor> items = new List<FeatureExtractor>();
-            items.Add(new FeatureExtractor() { featureName = "feature 1", include = true, action = (List<Fixation> fixations) => 1 });
+            items.Add(new FeatureExtractor() { featureName = "Fixation Duration (mean)", include = true, action = FixationDuration });
             items.Add(new FeatureExtractor() { featureName = "feature 2", include = true, action = (List<Fixation> fixations) => 2 });
             items.Add(new FeatureExtractor() { featureName = "feature 3", include = false, action = (List<Fixation> fixations) => 3 });
 
@@ -79,6 +81,21 @@ namespace EyeFixationDrawer
             }
 
             return featuresToExtract;
+        }
+
+
+        private double FixationDuration(List<Fixation> fixations)
+        {
+            double sum = 0;
+            int fixationCount = 1;
+
+            foreach (var fixation in fixations)
+            {
+                fixationCount++;
+                sum += fixation.endTime - fixation.startTime;
+            }
+
+            return sum / fixationCount;
         }
     }
 }
