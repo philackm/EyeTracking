@@ -25,10 +25,10 @@ namespace EyeFixationDrawer
         private GazePointDataStream stream;
 
         // GazePoints, Fixations & Saccades
+        // TODO: These shouldn't be stored and calculated in the view: MainWindow, (need to refactor all of this)
         private List<GazePoint> gazePoints = new List<GazePoint>();
         private List<Fixation> calculatedFixations = new List<Fixation>();
-        // TODO: Fixations
-        // TODO: Saccades
+        private List<Saccade> calculatedSaccades = new List<Saccade>();
 
         // UI Representations of the fixations and saccades.
         private List<Ellipse> gazeCircles = new List<Ellipse>();
