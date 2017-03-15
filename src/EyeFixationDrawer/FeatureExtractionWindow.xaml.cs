@@ -61,17 +61,31 @@ namespace EyeFixationDrawer
         {
             List<FeatureExtractor> items = new List<FeatureExtractor>();
 
+            // Fixation related features.
             items.Add(new FeatureExtractor() { featureName = "Fixation Duration (mean)", include = true, action = FixationDurationMean });
             items.Add(new FeatureExtractor() { featureName = "Fixation Duration (variance)", include = true, action = FixationDurationVariance });
             items.Add(new FeatureExtractor() { featureName = "Fixation Duration (standard deviation)", include = true, action = FixationDurationStandardDeviation });
             items.Add(new FeatureExtractor() { featureName = "Fixation Rate (per second)", include = true, action = FixationRatePerSecond });
             items.Add(new FeatureExtractor() { featureName = "Fixation Slope", include = true, action = FixationSlope });
+
+            // Saccade related features.
             items.Add(new FeatureExtractor() { featureName = "feature 6", include = true, action = (List<Fixation> fixations) => 6 });
             items.Add(new FeatureExtractor() { featureName = "feature 7", include = false, action = (List<Fixation> fixations) => 7 });
             items.Add(new FeatureExtractor() { featureName = "feature 8", include = true, action = (List<Fixation> fixations) => 8 });
             items.Add(new FeatureExtractor() { featureName = "feature 9", include = false, action = (List<Fixation> fixations) => 9 });
             items.Add(new FeatureExtractor() { featureName = "feature 10", include = true, action = (List<Fixation> fixations) => 10 });
             items.Add(new FeatureExtractor() { featureName = "feature 11", include = false, action = (List<Fixation> fixations) => 11 });
+
+            // "Saccade direction" based features.
+            // inversity
+            // category inversity
+            // neighbouring direction
+
+            // Wordbook related features.
+
+            // Blink related features.
+
+
 
             featureList.ItemsSource = items;
         }
