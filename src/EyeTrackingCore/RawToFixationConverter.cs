@@ -34,7 +34,7 @@ namespace EyeTrackingCore {
 
                 // 2: create vector "d", with distances between before and after windows
                 float axbxSquared = (meanBefore.x - meanAfter.x) * (meanBefore.x - meanAfter.x);
-                float aybySquared = (meanBefore.x - meanAfter.x) * (meanBefore.x - meanAfter.x);
+                float aybySquared = (meanBefore.y - meanAfter.y) * (meanBefore.y - meanAfter.y);
                 float difference = (float)Math.Sqrt(axbxSquared + aybySquared);
 
                 differences[i] = difference;
