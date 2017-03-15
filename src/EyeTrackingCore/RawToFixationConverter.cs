@@ -199,6 +199,22 @@ namespace EyeTrackingCore {
             return fixations;
         }
 
+        public List<Saccade> GenerateSaccades(List<Fixation> fixations)
+        {
+            List<Saccade> saccades = new List<Saccade>();
+
+            for (int i = 0; i < fixations.Count - 1; i++)
+            {
+                Fixation from = fixations[i];
+                Fixation to = fixations[i + 1];
+
+                Saccade s = new Saccade(new Point(from.x, from.y), new Point(to.x, to.y));
+                saccades.Add(s);
+            }
+
+            return saccades;
+        }
+
         private List<Point> ConvertGazePointsToPoints(List<GazePoint> gazePoints) {
             List<Point> newPoints = new List<Point>();
 

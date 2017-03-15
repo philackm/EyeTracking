@@ -4,8 +4,8 @@ namespace EyeTrackingCore
 {
     public class Saccade
     {
-        Point from;
-        Point to;
+        private Point from;
+        private Point to;
 
         private Lazy<double> distance;
         private Lazy<double> direction; // in radians
@@ -35,6 +35,22 @@ namespace EyeTrackingCore
             }
         }
 
+        public Point From
+        {
+            get
+            {
+                return from;
+            }
+        }
+
+        public Point To
+        {
+            get
+            {
+                return to;
+            }
+        }
+
         private double CalculateDistance()
         {
             double fx = from.x;
@@ -57,7 +73,23 @@ namespace EyeTrackingCore
             double opposite = to.y - from.y;
             double adjacent = to.x - from.x;
 
-            return Math.Atan2(-opposite, adjacent);
+            double tan = Math.Atan2(-opposite, adjacent);
+
+            // convert the angle to be between 0 and 2pi
+
+            double angle = 0;
+
+            if (tan < 0)
+            {
+                angle = Math.PI + (Math.PI + tan);
+            }
+            else
+            {
+                angle = tan;
+            }
+
+            
+            return angle;
         }
     }
 }

@@ -30,12 +30,6 @@ namespace EyeFixationDrawer
         private List<Fixation> calculatedFixations = new List<Fixation>();
         private List<Saccade> calculatedSaccades = new List<Saccade>();
 
-        // UI Representations of the fixations and saccades.
-        private List<Ellipse> gazeCircles = new List<Ellipse>();
-        private List<Ellipse> fixationCircles = new List<Ellipse>();
-        private List<Line> saccades = new List<Line>();
-        private List<TextBlock> fixationTimeLabels = new List<TextBlock>();
-
         // Loading/Saving Data
         private XmlSerializer serialiser;
 
@@ -44,15 +38,31 @@ namespace EyeFixationDrawer
         private double peakThreshold = 50;
         private double radius = 10;
 
+        // UI Specifics
+        // ################
+
         // Determines the maximum settable by the UI
         private int maxWindowSize = 100;
         private double maxPeakThreshold = 200;
         private double maxRadius = 200;
 
-        // UI Specifics
+        // UI Representations of the fixations and saccades.
+        private List<Ellipse> gazeCircles = new List<Ellipse>();
+        private List<Ellipse> fixationCircles = new List<Ellipse>();
+        private List<Line> saccadeLines = new List<Line>();
+        private List<TextBlock> fixationTimeLabels = new List<TextBlock>();
+        private List<Path> saccadeAnglePaths = new List<Path>();
+
         private double fixationCircleSize = 20;
-        private double gazePointCircleSize = 5;
+        private double gazePointCircleSize = 6;
         private double saccadeLineWidth = 2;
+
+        private SolidColorBrush gazePointBrush = new SolidColorBrush(Color.FromArgb(64, 0, 0, 0));
+        private SolidColorBrush saccadeAngleBrush = new SolidColorBrush(Color.FromArgb(64, 255, 0, 0));
+
+        bool shouldDrawAngles = false;
+
+        private double saccadeAngleRadius = 25;
 
         private double startTime;
 
@@ -68,6 +78,9 @@ namespace EyeFixationDrawer
 
             // Make note of when we started recording.
             startTime = GetUnixMillisecondsForNow();
+
+            gazePointBrush.Freeze();
+            saccadeAngleBrush.Freeze();
         }
 
         private void InitEyeTracker()
@@ -107,14 +120,14 @@ namespace EyeFixationDrawer
         // Gaze Points
         private void DrawCircleAtGazePoint(object sender, GazePointEventArgs args)
         {
-            DrawCircle(args.X, args.Y, System.Windows.Media.Brushes.Black, gazePointCircleSize);
+            DrawCircle(args.X, args.Y, gazePointBrush, gazePointCircleSize);
         }
 
         private void DrawAllGazePoints()
         {
             foreach (GazePoint gazePoint in gazePoints)
             {
-                DrawCircle(gazePoint.x, gazePoint.y, System.Windows.Media.Brushes.Black, 5);
+                DrawCircle(gazePoint.x, gazePoint.y, gazePointBrush, gazePointCircleSize);
             }
         }
 
@@ -132,7 +145,11 @@ namespace EyeFixationDrawer
         private void DrawFixations()
         {
             RawToFixationConverter converter = new RawToFixationConverter(gazePoints);
+
             List<Fixation> fixations = converter.CalculateFixations(currentWindowSize, (float)peakThreshold, (float)radius);
+            List<Saccade> saccades = converter.GenerateSaccades(fixations);
+
+            calculatedSaccades = saccades;
             calculatedFixations = fixations;
 
             foreach (Fixation fixation in fixations)
@@ -224,6 +241,7 @@ namespace EyeFixationDrawer
         // Saccades
         private void DrawSaccades()
         {
+            // Draw the saccade lines.
             for (int i = 1; i < fixationCircles.Count; i++)
             {
                 Ellipse from = fixationCircles[i - 1];
@@ -245,19 +263,106 @@ namespace EyeFixationDrawer
                 line.StrokeThickness = saccadeLineWidth;
                 line.Stroke = System.Windows.Media.Brushes.Red;
 
-                saccades.Add(line);
+                saccadeLines.Add(line);
                 canvas.Children.Add(line);
+            }
+
+            
+            // Draw the angle arcs.
+            if(shouldDrawAngles)
+            {
+                foreach (Saccade s in calculatedSaccades)
+                {
+                    DrawAngleArc(s);
+                }
             }
         }
 
         private void RemoveSaccades()
         {
-            foreach (Line line in saccades)
+            foreach (Line line in saccadeLines)
             {
                 canvas.Children.Remove(line);
             }
 
-            saccades.Clear();
+            foreach(Path path in saccadeAnglePaths)
+            {
+                canvas.Children.Remove(path);
+            }
+
+            saccadeLines.Clear();
+        }
+
+
+        private Path CreateArcPath(System.Windows.Point centre, double radians, double radius)
+        {
+            // Create a path to draw a geometry with.
+            Path path = new Path();
+            path.Stroke = saccadeAngleBrush;
+            path.Fill = saccadeAngleBrush;
+            path.StrokeThickness = 1;
+
+            // Create a StreamGeometry to use to specify myPath.
+            StreamGeometry geometry = new StreamGeometry();
+            geometry.FillRule = FillRule.EvenOdd;
+
+            // Open a StreamGeometryContext that can be used to describe this StreamGeometry object's contents. 
+            using (StreamGeometryContext ctx = geometry.Open())
+            {
+
+                // start point is the centre
+                // end point is the radius times (radius * cos(radians), radius* sin(radians)) 
+
+                double endX = centre.X + (radius * Math.Cos(radians));
+                double endY = centre.Y - (radius * Math.Sin(radians));
+                System.Windows.Point endPoint = new System.Windows.Point(endX, endY);
+
+                SweepDirection direction = radians < 0 ? SweepDirection.Clockwise : SweepDirection.Counterclockwise;
+                bool isLargeArc = radians > Math.PI ? true : false;
+
+
+                // Set the begin point of the shape.
+                ctx.BeginFigure(centre, true /* is filled */, true /* is closed */);
+
+                ctx.LineTo(new System.Windows.Point(centre.X + radius, centre.Y), true, false);
+
+
+                // Create an arc. Draw the arc from the begin point to 200,100 with the specified parameters.
+                ctx.ArcTo(endPoint, new Size(radius, radius), 0 /* rotation angle */, isLargeArc /* is large arc */,
+                          direction, true /* is stroked */, false /* is smooth join */);
+
+                Console.WriteLine(radians);
+
+                ctx.LineTo(centre, true, false);
+
+            }
+
+            // Freeze the geometry (make it unmodifiable)
+            // for additional performance benefits.
+            geometry.Freeze();
+
+            // specify the shape (arc) of the path using the StreamGeometry.
+            path.Data = geometry;
+
+            return path;
+        }
+
+        private void DrawAngleArc(Saccade saccade)
+        {
+            // Want to draw the angle arc at the beginning of the saccade (?)
+            System.Windows.Point arcCentre = new System.Windows.Point(saccade.From.x, saccade.From.y);
+            System.Windows.Point arcCentreCanvas = ScreenToCanvas(arcCentre);
+
+            arcCentreCanvas.X += fixationCircleSize / 2;
+            arcCentreCanvas.Y += fixationCircleSize / 2;
+
+            Double angle = saccade.Direction;
+
+            // Create a path to draw a geometry with.
+            Path arcPath = CreateArcPath(arcCentreCanvas, angle, saccadeAngleRadius);
+
+            canvas.Children.Add(arcPath);
+            saccadeAnglePaths.Add(arcPath);
         }
 
         // Helper method that converts a point in screen space to canvas space.
@@ -415,6 +520,11 @@ namespace EyeFixationDrawer
         {
             Window featureExtractionWindow = new FeatureExtractionWindow(calculatedFixations);
             featureExtractionWindow.Show();
+        }
+
+        private void saccadeAngleCheckbox_Changed(object sender, RoutedEventArgs e)
+        {
+            shouldDrawAngles = saccadeAngleCheckbox.IsChecked ?? false;
         }
     }
 }

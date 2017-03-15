@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EyeFixationDrawer"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        Title="MainWindow" Height="1000" Width="1777">
     <Grid>
         <Canvas Margin="0" Name="canvas">
             <Button x:Name="startButton" Content="Start" Canvas.Left="10" Canvas.Top="10" Width="75" Click="Start_Click"/>
@@ -21,6 +21,7 @@
             <Label x:Name="radiusLabel" Content="Radius" Canvas.Left="10" Canvas.Top="248"/>
             <Button x:Name="button" Content="Load Data" Canvas.Left="90" Canvas.Top="59" Width="75" Click="LoadData_Click"/>
             <Button x:Name="featureSelectionButton" Content="Select Features" Canvas.Left="10" Canvas.Top="109" Width="100" Click="featureSelectionButton_Click"/>
+            <CheckBox x:Name="saccadeAngleCheckbox" Content="Draw Saccade Angles" Canvas.Left="10" Canvas.Top="134" Unchecked="saccadeAngleCheckbox_Changed" Checked="saccadeAngleCheckbox_Changed"/>
         </Canvas>
     </Grid>
 </Window>
