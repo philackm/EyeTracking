@@ -21,7 +21,9 @@
             <Label x:Name="radiusLabel" Content="Radius" Canvas.Left="10" Canvas.Top="248"/>
             <Button x:Name="button" Content="Load Data" Canvas.Left="90" Canvas.Top="59" Width="75" Click="LoadData_Click"/>
             <Button x:Name="featureSelectionButton" Content="Select Features" Canvas.Left="10" Canvas.Top="109" Width="100" Click="featureSelectionButton_Click"/>
+            <Button x:Name="directionFrequenciesButton" Content="Print Direction Frequencies" Canvas.Left="115" Canvas.Top="109" Width="161" Click="directionFrequenciesButton_Click"/>
             <CheckBox x:Name="saccadeAngleCheckbox" Content="Draw Saccade Angles" Canvas.Left="10" Canvas.Top="134" Unchecked="saccadeAngleCheckbox_Changed" Checked="saccadeAngleCheckbox_Changed"/>
+            
         </Canvas>
     </Grid>
 </Window>

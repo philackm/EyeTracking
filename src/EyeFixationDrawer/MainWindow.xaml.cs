@@ -526,5 +526,11 @@ namespace EyeFixationDrawer
         {
             shouldDrawAngles = saccadeAngleCheckbox.IsChecked ?? false;
         }
+
+        private void directionFrequenciesButton_Click(object sender, RoutedEventArgs e)
+        {
+            Dictionary<int, int> counts = CSVGenerator.CalculateDirectionCounts(calculatedSaccades.ToArray());
+            CSVGenerator.CreateDirectionCSV(counts);
+        }
     }
 }

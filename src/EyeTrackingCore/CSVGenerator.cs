@@ -72,7 +72,7 @@ namespace EyeTrackingCore
         {
             for (int i = 0; i < numSegments; i++)
             {
-                int segment = i;
+                int segment = i * 10;
                 int value = directionCounts.ContainsKey(i) ? directionCounts[i] : 0;
                 Console.WriteLine(segment + "," + value);
             }
