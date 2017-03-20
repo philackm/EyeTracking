@@ -49,6 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CSVGenerator.cs" />
     <Compile Include="Fixation.cs" />
     <Compile Include="GazePoint.cs" />
     <Compile Include="Program.cs" />
