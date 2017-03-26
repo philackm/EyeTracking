@@ -2,6 +2,14 @@
 
 namespace EyeTrackingCore
 {
+
+    // Long is defined to be a saccade > 1.1 degrees
+    public enum SaccadeType
+    {
+        Long,
+        Short
+    }
+
     public class Saccade
     {
         private Point from;
@@ -9,6 +17,12 @@ namespace EyeTrackingCore
 
         private Lazy<double> distance;
         private Lazy<double> direction; // in radians
+        private Lazy<SaccadeType> type;
+
+        private double distanceFromMonitor = 60; // cm
+        private double thresholdAngle = 1.1; // degrees
+        private double pixelsPerCm = 96 / 2.54; //average is 96 pixels per inch, and there are 2.54cm per inch
+
 
         public Saccade(Point from, Point to)
         {
@@ -17,6 +31,7 @@ namespace EyeTrackingCore
 
             distance = new Lazy<double>(() => CalculateDistance());
             direction = new Lazy<double>(() => CalculateDirection());
+            type = new Lazy<SaccadeType>(() => CalculateSaccadeType(distanceFromMonitor, thresholdAngle, pixelsPerCm));
         }
 
         public double Distance
@@ -32,6 +47,14 @@ namespace EyeTrackingCore
             get
             {
                 return direction.Value;
+            }
+        }
+
+        public SaccadeType Type
+        {
+            get
+            {
+                return type.Value;
             }
         }
 
@@ -92,12 +115,25 @@ namespace EyeTrackingCore
             return angle;
         }
 
+        // distanceFromEyesToMonitor is in cm
+        // threshold is the number of degrees the eye must move before a short saccade becomes a long saccade
+        // pixelspercm is the pixel density of the display
+        private SaccadeType CalculateSaccadeType(double distanceFromEyesToMonitor, double thresholdAngle, double pixelsPerCM)
+        {
+            // Calculate visual distance of threshold in pixels. (Takes into account pixel density.)
+            double visualDistanceThreshold = (Math.Tan(DegreesToRadians(thresholdAngle)) * distanceFromEyesToMonitor) * pixelsPerCM;
+            SaccadeType type = this.Distance > visualDistanceThreshold ? SaccadeType.Long : SaccadeType.Short;
+            return type;
+        }
 
+        public static double RadiansToDegrees(double radians)
+        {
+            return (radians / Math.PI) * 180;
+        }
 
-
-
-
-
-
+        public static double DegreesToRadians(double degrees)
+        {
+            return (degrees / 180) * Math.PI;
+        }
     }
 }

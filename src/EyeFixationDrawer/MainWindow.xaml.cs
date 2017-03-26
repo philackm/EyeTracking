@@ -518,7 +518,7 @@ namespace EyeFixationDrawer
 
         private void featureSelectionButton_Click(object sender, RoutedEventArgs e)
         {
-            Window featureExtractionWindow = new FeatureExtractionWindow(calculatedFixations);
+            Window featureExtractionWindow = new FeatureExtractionWindow(calculatedFixations, calculatedSaccades);
             featureExtractionWindow.Show();
         }
 
