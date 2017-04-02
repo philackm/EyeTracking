@@ -242,31 +242,27 @@ namespace EyeFixationDrawer
         private void DrawSaccades()
         {
             // Draw the saccade lines.
-            for (int i = 1; i < fixationCircles.Count; i++)
+            foreach (Saccade s in calculatedSaccades)
             {
-                Ellipse from = fixationCircles[i - 1];
-                Ellipse to = fixationCircles[i];
+                EyeTrackingCore.Point from = s.From;
+                EyeTrackingCore.Point to = s.To;
 
-                double startX = Canvas.GetLeft(from) + (fixationCircleSize / 2);
-                double startY = Canvas.GetTop(from) + (fixationCircleSize / 2);
-
-                double endX = Canvas.GetLeft(to) + (fixationCircleSize / 2);
-                double endY = Canvas.GetTop(to) + (fixationCircleSize / 2);
+                System.Windows.Point start = ScreenToCanvas(new System.Windows.Point(s.From.x, s.From.y));
+                System.Windows.Point end = ScreenToCanvas(new System.Windows.Point(s.To.x, s.To.y));
 
                 System.Windows.Shapes.Line line = new System.Windows.Shapes.Line();
-                line.X1 = startX;
-                line.Y1 = startY;
+                line.X1 = start.X + (fixationCircleSize / 2);
+                line.Y1 = start.Y + (fixationCircleSize / 2);
 
-                line.X2 = endX;
-                line.Y2 = endY;
+                line.X2 = end.X + (fixationCircleSize / 2);
+                line.Y2 = end.Y + (fixationCircleSize / 2);
 
                 line.StrokeThickness = saccadeLineWidth;
-                line.Stroke = System.Windows.Media.Brushes.Red;
+                line.Stroke = s.Type == SaccadeType.Long ? System.Windows.Media.Brushes.Red : System.Windows.Media.Brushes.Blue ;
 
                 saccadeLines.Add(line);
                 canvas.Children.Add(line);
             }
-
             
             // Draw the angle arcs.
             if(shouldDrawAngles)
