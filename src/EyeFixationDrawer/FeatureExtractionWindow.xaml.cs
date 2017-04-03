@@ -110,11 +110,18 @@ namespace EyeFixationDrawer
 
             // Saccade related features.
             items.Add(new SaccadeFeatureExtractor() { featureName = "Number of Short Saccades", include = true, action = NumberOfShortSaccades });
-            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of Long Saccades", include = false, action = NumberOfLongSaccades });
-            items.Add(new SaccadeFeatureExtractor() { featureName = "feature 8", include = true, action = (List<Saccade> fixations) => 8 });
-            items.Add(new SaccadeFeatureExtractor() { featureName = "feature 9", include = true, action = (List<Saccade> fixations) => 9 });
-            items.Add(new SaccadeFeatureExtractor() { featureName = "feature 10", include = true, action = (List<Saccade> fixations) => 10 });
-            items.Add(new SaccadeFeatureExtractor() { featureName = "feature 11", include = true, action = (List<Saccade> fixations) => 11 });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of Long Saccades", include = true, action = NumberOfLongSaccades });
+
+            // Saccade direction counts. (36 features, one for each 10 degree bucket)
+            // TODO: figure out how we can write out 36 features whilst passing one function
+            // items.Add(new SaccadeFeatureExtractor() { featureName = "Saccade Direction Counts", include = true, action = SaccadeDirectionCounts });
+
+            // For each successive pair of saccades, how many had an opposite direction, how many had a neighbouring direction.
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Opposite Direction Counts", include = false, action = (List<Saccade> fixations) => 9 });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Neighbouring Direction Counts", include = false, action = (List<Saccade> fixations) => 10 });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "feature 11", include = false, action = (List<Saccade> fixations) => 11 });
+
+            // Wordbook / Pattern related features.
 
             // "Saccade direction" based features.
             // inversity
@@ -236,6 +243,17 @@ namespace EyeFixationDrawer
             }
 
             return count;
+        }
+
+        private double SaccadeDirectionCounts(List<Saccade> saccades)
+        {
+            // key is 0 through 35
+            // value is the count for that bucket
+            Dictionary<int, int> counts = CSVGenerator.CalculateDirectionCounts(currentlyLoadedSaccades.ToArray());
+
+
+
+            return 0;
         }
     }
 }

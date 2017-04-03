@@ -241,6 +241,8 @@ namespace EyeFixationDrawer
         // Saccades
         private void DrawSaccades()
         {
+            //Saccade previous = null; // testing
+
             // Draw the saccade lines.
             foreach (Saccade s in calculatedSaccades)
             {
@@ -262,6 +264,16 @@ namespace EyeFixationDrawer
 
                 saccadeLines.Add(line);
                 canvas.Children.Add(line);
+
+                /*
+                // testing
+                if(previous != null)
+                {
+                    Console.WriteLine(Saccade.Compare(s, previous));
+                }
+
+                previous = s;
+                */
             }
             
             // Draw the angle arcs.
