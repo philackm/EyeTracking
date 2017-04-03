@@ -213,28 +213,28 @@ namespace EyeTrackingCore
             return result;
         }
 
-        public static bool IsRelatedBy(String relation, Saccade second, Saccade first)
+        private static bool IsRelatedBy(String relation, Saccade second, Saccade first)
         {
             return Saccade.sectorRelations[second.Sector4][relation].ToList().Contains(first.Sector4);
         }
 
-        // Ask: Is the following saccade opposite to the one preceding it, neighbouring the one preceding it, or neither ("roughly perpendicular")
-        public static bool IsOpposite(Saccade second, Saccade first)
+        // Ask: Is the following saccade opposite to the one preceding it, following it (in the same sector), or is it a neighbour (in a neighbouring sector)
+        private static bool IsOpposite(Saccade second, Saccade first)
         {
             return IsRelatedBy("opposite", second, first);
         }
 
-        public static bool IsFollow(Saccade second, Saccade first)
+        private static bool IsFollow(Saccade second, Saccade first)
         {
             return IsRelatedBy("follow", second, first);
         }
 
-        public static bool IsNeighbour(Saccade second, Saccade first)
+        private static bool IsNeighbour(Saccade second, Saccade first)
         {
             return IsRelatedBy("neighbour", second, first);
         }
 
-        public static Dictionary<Sector, Dictionary<String, Sector[]>> SetupRelations()
+        private static Dictionary<Sector, Dictionary<String, Sector[]>> SetupRelations()
         {
             // up -> down, left, right
             // down -> up, left, right

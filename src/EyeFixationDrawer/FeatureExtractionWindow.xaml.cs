@@ -44,6 +44,7 @@ namespace EyeFixationDrawer
         private void FeatureExtractionWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             List<FixationExtractor> extractors = GetFeatures();
+            bool includeNames = true;
             
             foreach (var extractor in extractors)
             {
@@ -51,11 +52,13 @@ namespace EyeFixationDrawer
                 {
                     case RequiredData.Fixation:
                         var fixationExtractor = extractor as FixationFeatureExtractor;
-                        Console.Write(fixationExtractor.action(currentlyLoadedFixations) + ",");
+                        if (includeNames) Console.Write(fixationExtractor.featureName + ": ");
+                        Console.Write(fixationExtractor.action(currentlyLoadedFixations) + ", ");
                         break;
                     case RequiredData.Saccade:
                         var saccadeExtractor = extractor as SaccadeFeatureExtractor;
-                        Console.Write(saccadeExtractor.action(currentlyLoadedSaccades) + ",");
+                        if (includeNames) Console.Write(saccadeExtractor.featureName + ": ");
+                        Console.Write(saccadeExtractor.action(currentlyLoadedSaccades) + ", ");
                         break;
                 }
                 
@@ -117,9 +120,15 @@ namespace EyeFixationDrawer
             // items.Add(new SaccadeFeatureExtractor() { featureName = "Saccade Direction Counts", include = true, action = SaccadeDirectionCounts });
 
             // For each successive pair of saccades, how many had an opposite direction, how many had a neighbouring direction.
-            items.Add(new SaccadeFeatureExtractor() { featureName = "Opposite Direction Counts", include = false, action = (List<Saccade> fixations) => 9 });
-            items.Add(new SaccadeFeatureExtractor() { featureName = "Neighbouring Direction Counts", include = false, action = (List<Saccade> fixations) => 10 });
-            items.Add(new SaccadeFeatureExtractor() { featureName = "feature 11", include = false, action = (List<Saccade> fixations) => 11 });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Follow Direction Count", include = true, action = FollowDirectionCount });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Neighbouring Direction Count", include = true, action = NeighbouringDirectionCount });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Opposite Direction Count", include = true, action = OppositeDirectionCount });
+
+            // For the 4 sectors, how many of each sector do we have?
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Sector4 Right Count", include = true, action = Sector4RightCount });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Sector4 Up Count", include = true, action = Sector4UpCount });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Sector4 Left Count", include = true, action = Sector4LeftCount });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Sector4 Down Count", include = true, action = Sector4DownCount });
 
             // Wordbook / Pattern related features.
 
@@ -250,10 +259,69 @@ namespace EyeFixationDrawer
             // key is 0 through 35
             // value is the count for that bucket
             Dictionary<int, int> counts = CSVGenerator.CalculateDirectionCounts(currentlyLoadedSaccades.ToArray());
-
-
-
+            
             return 0;
         }
+
+        // TODO: possible feature:  "longest follow streak, mean/median follow streak"
+        //                          "longest opposite streak, mean/meadian opposite streak" 
+
+        private double CountRelation(Saccade.Relation relation, List<Saccade> saccades)
+        {
+            int count = 0;
+            int numberOfSaccades = saccades.Count;
+
+            // Compare each pair of saccades.
+            for (int i = 1; i < numberOfSaccades; i++)
+            {
+                Saccade previous = saccades[i - 1];
+                Saccade next = saccades[i];
+
+                if (Saccade.Compare(next, previous) == relation)
+                {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
+        private double FollowDirectionCount(List<Saccade> saccades)
+        {
+            return CountRelation(Saccade.Relation.Follow, saccades);
+        }
+
+        private double NeighbouringDirectionCount(List<Saccade> saccades)
+        {
+            return CountRelation(Saccade.Relation.Neighbour, saccades);
+        }
+
+        private double OppositeDirectionCount(List<Saccade> saccades)
+        {
+            return CountRelation(Saccade.Relation.Opposite, saccades);
+        }
+
+
+        private double Sector4RightCount(List<Saccade> saccades)
+        {
+            return saccades.Where(saccade => saccade.Sector4 == Sector.Right).ToList().Count;
+        }
+
+        private double Sector4UpCount(List<Saccade> saccades)
+        {
+            return saccades.Where(saccade => saccade.Sector4 == Sector.Up).ToList().Count;
+        }
+
+        private double Sector4LeftCount(List<Saccade> saccades)
+        {
+            return saccades.Where(saccade => saccade.Sector4 == Sector.Left).ToList().Count;
+        }
+
+        private double Sector4DownCount(List<Saccade> saccades)
+        {
+            return saccades.Where(saccade => saccade.Sector4 == Sector.Down).ToList().Count;
+        }
+
+        
     }
 }
