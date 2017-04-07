@@ -12,6 +12,9 @@ using EyeXFramework; // Tobii
 using Tobii.EyeX.Framework; // Tobii
 
 using EyeTrackingCore; // From EyeTrackingCore project reference
+using System.IO.Pipes;
+using System.IO;
+using Path = System.Windows.Shapes.Path;
 
 namespace EyeFixationDrawer
 {
@@ -180,7 +183,7 @@ namespace EyeFixationDrawer
                 {
                     fixationCircles.Add(ellipse);
                 }
-                else if(brush == System.Windows.Media.Brushes.Black)
+                else if (brush == System.Windows.Media.Brushes.Black)
                 {
                     gazeCircles.Add(ellipse);
                 }
@@ -260,7 +263,7 @@ namespace EyeFixationDrawer
                 line.Y2 = end.Y + (fixationCircleSize / 2);
 
                 line.StrokeThickness = saccadeLineWidth;
-                line.Stroke = s.Type == SaccadeType.Long ? System.Windows.Media.Brushes.Red : System.Windows.Media.Brushes.Blue ;
+                line.Stroke = s.Type == SaccadeType.Long ? System.Windows.Media.Brushes.Red : System.Windows.Media.Brushes.Blue;
 
                 saccadeLines.Add(line);
                 canvas.Children.Add(line);
@@ -275,9 +278,9 @@ namespace EyeFixationDrawer
                 previous = s;
                 */
             }
-            
+
             // Draw the angle arcs.
-            if(shouldDrawAngles)
+            if (shouldDrawAngles)
             {
                 foreach (Saccade s in calculatedSaccades)
                 {
@@ -293,7 +296,7 @@ namespace EyeFixationDrawer
                 canvas.Children.Remove(line);
             }
 
-            foreach(Path path in saccadeAnglePaths)
+            foreach (Path path in saccadeAnglePaths)
             {
                 canvas.Children.Remove(path);
             }
@@ -463,7 +466,7 @@ namespace EyeFixationDrawer
             System.IO.FileStream fileStream = new System.IO.FileStream("./gazePoints.xml", System.IO.FileMode.OpenOrCreate);
 
             try
-            {    
+            {
                 this.serialiser.Serialize(fileStream, gazePoints);
             }
             catch (Exception exception)
@@ -520,7 +523,7 @@ namespace EyeFixationDrawer
                 {
                     fileStream.Close();
                 }
-                
+
             }
         }
 
@@ -541,12 +544,38 @@ namespace EyeFixationDrawer
             CSVGenerator.CreateDirectionCSV(counts);
         }
 
+        private void GetLocation()
+        {
 
+            try
+            {
+                var client = new NamedPipeClientStream("VSServerPipe");
+                Console.WriteLine("Sending message to server.");
+                client.Connect();
+                StreamReader reader = new StreamReader(client);
+                StreamWriter writer = new StreamWriter(client);
 
-         
+                writer.WriteLine("get");
+                writer.Flush();
 
+                Console.WriteLine("Waiting on server...");
+                string result = "";
+                result = reader.ReadLine();
 
+                System.Windows.MessageBox.Show(result);
 
+                client.Dispose();
+            }
+            catch(InvalidOperationException e)
+            {
+                Console.WriteLine(e.Message);
+            }
+            
+        }
 
+        private void sendMessageToServerButton_Click(object sender, RoutedEventArgs e)
+        {
+            GetLocation();
+        }
     }
 }

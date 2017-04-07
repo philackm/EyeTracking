@@ -23,7 +23,8 @@
             <Button x:Name="featureSelectionButton" Content="Select Features" Canvas.Left="10" Canvas.Top="109" Width="100" Click="featureSelectionButton_Click"/>
             <Button x:Name="directionFrequenciesButton" Content="Print Direction Frequencies" Canvas.Left="115" Canvas.Top="109" Width="161" Click="directionFrequenciesButton_Click"/>
             <CheckBox x:Name="saccadeAngleCheckbox" Content="Draw Saccade Angles" Canvas.Left="10" Canvas.Top="134" Unchecked="saccadeAngleCheckbox_Changed" Checked="saccadeAngleCheckbox_Changed"/>
-            
+            <Button x:Name="sendMessageToServerButton" Content="Send" Canvas.Left="281" Canvas.Top="109" Width="75" Click="sendMessageToServerButton_Click"/>
+
         </Canvas>
     </Grid>
 </Window>
