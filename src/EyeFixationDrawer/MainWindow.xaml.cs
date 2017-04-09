@@ -394,6 +394,25 @@ namespace EyeFixationDrawer
             return new System.Windows.Point(X, Y);
         }
 
+        private System.Windows.Point CanvasToScreen(System.Windows.Point canvasPosition)
+        {
+            double windowX = 0;
+            double windowY = 0;
+
+            this.Dispatcher.Invoke((Action)(() =>
+            {
+                windowX = this.Left;
+                windowY = this.Top;
+            }));
+
+            double X = canvasPosition.X + windowX;
+            double Y = canvasPosition.Y + windowY;
+
+            return new System.Windows.Point(X, Y);
+        }
+
+
+
         // Events
         // ######
 
@@ -544,9 +563,8 @@ namespace EyeFixationDrawer
             CSVGenerator.CreateDirectionCSV(counts);
         }
 
-        private void GetLocation()
+        private int GetVSWindowForScreenPoint(System.Windows.Point screenPoint)
         {
-
             try
             {
                 var client = new NamedPipeClientStream("VSServerPipe");
@@ -555,27 +573,45 @@ namespace EyeFixationDrawer
                 StreamReader reader = new StreamReader(client);
                 StreamWriter writer = new StreamWriter(client);
 
-                writer.WriteLine("get");
+                string requestMessage = String.Format("get {0} {1}\n", screenPoint.X, screenPoint.Y);
+                writer.WriteLine(requestMessage);
                 writer.Flush();
 
                 Console.WriteLine("Waiting on server...");
-                string result = "";
-                result = reader.ReadLine();
+                string result = reader.ReadLine();
 
-                System.Windows.MessageBox.Show(result);
-
-                client.Dispose();
+                if(result == "error")
+                {
+                    client.Dispose();
+                    return 0;
+                }
+                else
+                {
+                    client.Dispose();
+                    return Int32.Parse(result);
+                }
             }
             catch(InvalidOperationException e)
             {
                 Console.WriteLine(e.Message);
+                return 0;
             }
-            
         }
 
         private void sendMessageToServerButton_Click(object sender, RoutedEventArgs e)
         {
-            GetLocation();
+            //GetLocation();
+        }
+
+        private void canvas_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            int x = (int)e.GetPosition(canvas).X;
+            int y = (int)e.GetPosition(canvas).Y;
+
+            System.Windows.Point screenPoint = CanvasToScreen(new System.Windows.Point(x, y));
+
+            int window = GetVSWindowForScreenPoint(screenPoint);
+            System.Windows.MessageBox.Show(window.ToString());
         }
     }
 }

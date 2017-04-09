@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="1000" Width="1777">
     <Grid>
-        <Canvas Margin="0" Name="canvas">
+        <Canvas Margin="0" Name="canvas" Background="White" MouseDown="canvas_MouseLeftButtonDown">
             <Button x:Name="startButton" Content="Start" Canvas.Left="10" Canvas.Top="10" Width="75" Click="Start_Click"/>
             <Button x:Name="stopButton" Content="Stop" Canvas.Left="10" Canvas.Top="34" Width="75" Click="Stop_Click"/>
             <Button x:Name="saveDataButton" Content="Save Data" Canvas.Left="10" Canvas.Top="59" Width="75" Click="SaveData_Click"/>
