@@ -16,8 +16,8 @@ namespace ConsoleApplication
             Console.WriteLine(points.ToString());
             Console.WriteLine("Starting array serialisation to file...");
 
-            points.Add(new GazePoint(1, 1, 0));
-            points.Add(new GazePoint(2, 2, 1));
+            points.Add(new GazePoint(1, 1, 0, VSLocation.Nothing));
+            points.Add(new GazePoint(2, 2, 1, VSLocation.Nothing));
 
             try
             {

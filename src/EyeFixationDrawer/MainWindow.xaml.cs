@@ -26,7 +26,7 @@ namespace EyeFixationDrawer
         // Access to the Tobii eyeX
         private EyeXHost _eyeXHost;
         private GazePointDataStream stream;
-        private bool trackingVSLocation = false;
+        private bool trackingVSLocation = true;
 
         // GazePoints, Fixations & Saccades
         // TODO: These shouldn't be stored and calculated in the view: MainWindow, (need to refactor all of this)
@@ -72,8 +72,13 @@ namespace EyeFixationDrawer
                 [VSLocation.Output] = System.Windows.Media.Brushes.Blue
             };
 
-        bool shouldDrawAngles = false;
+        enum CircleType
+        {
+            Gaze,
+            Fixation
+        }
 
+        bool shouldDrawAngles = false;
         private double saccadeAngleRadius = 25;
 
         private double startTime;
@@ -120,7 +125,7 @@ namespace EyeFixationDrawer
 
             // If we are tracking Visual Studio locations
 
-            VSLocation location = trackingVSLocation ? (VSLocation)GetVSWindowForScreenPoint(args.X, args.Y) : GetVSLocationVSLocation.Nothing; 
+            VSLocation location = trackingVSLocation ? (VSLocation)GetVSWindowForScreenPoint(new System.Windows.Point(args.X, args.Y)) : VSLocation.Nothing; 
 
             GazePoint gazePoint = new GazePoint((float)args.X, (float)args.Y, elapsedMilliseconds, location);
             gazePoints.Add(gazePoint);
@@ -137,14 +142,14 @@ namespace EyeFixationDrawer
         // Gaze Points
         private void DrawCircleAtGazePoint(object sender, GazePointEventArgs args)
         {
-            DrawCircle(args.X, args.Y, gazePointBrush, gazePointCircleSize);
+            DrawCircle(args.X, args.Y, gazePointBrush, gazePointCircleSize, CircleType.Gaze);
         }
 
         private void DrawAllGazePoints()
         {
             foreach (GazePoint gazePoint in gazePoints)
             {
-                DrawCircle(gazePoint.x, gazePoint.y, gazePointBrush, gazePointCircleSize);
+                DrawCircle(gazePoint.x, gazePoint.y, gazePointBrush, gazePointCircleSize, CircleType.Gaze);
             }
         }
 
@@ -176,12 +181,14 @@ namespace EyeFixationDrawer
 
                 System.Windows.Media.SolidColorBrush brush = VSLocationBrushes[fixation.location];
 
-                DrawCircle(fixation.x, fixation.y, brush, fixationCircleSize);
+                DrawCircle(fixation.x, fixation.y, brush, fixationCircleSize, CircleType.Fixation);
                 DrawLabel(seconds.ToString(), fixation.x + fixationCircleSize, fixation.y, brush);
             }
         }
 
-        private void DrawCircle(double screenX, double screenY, SolidColorBrush brush, double size)
+
+
+        private void DrawCircle(double screenX, double screenY, SolidColorBrush brush, double size, CircleType circleType)
         {
             this.Dispatcher.Invoke((Action)(() =>
             {
@@ -194,14 +201,14 @@ namespace EyeFixationDrawer
                 Canvas.SetLeft(ellipse, canvasXY.X);
                 Canvas.SetTop(ellipse, canvasXY.Y);
 
-                // This is absolutey horrible, needs to change.
-                if (brush == System.Windows.Media.Brushes.Red)
+                switch(circleType)
                 {
-                    fixationCircles.Add(ellipse);
-                }
-                else if (brush == System.Windows.Media.Brushes.Black)
-                {
-                    gazeCircles.Add(ellipse);
+                    case CircleType.Gaze:
+                        gazeCircles.Add(ellipse);
+                        break;
+                    case CircleType.Fixation:
+                        fixationCircles.Add(ellipse);
+                        break;
                 }
 
                 canvas.Children.Add(ellipse);
@@ -589,9 +596,11 @@ namespace EyeFixationDrawer
                 StreamReader reader = new StreamReader(client);
                 StreamWriter writer = new StreamWriter(client);
 
-                string requestMessage = String.Format("get {0} {1}\n", screenPoint.X, screenPoint.Y);
+                string requestMessage = String.Format("get {0} {1}\n", (int)screenPoint.X, (int)screenPoint.Y);
                 writer.WriteLine(requestMessage);
                 writer.Flush();
+
+                Console.WriteLine(requestMessage);
 
                 Console.WriteLine("Waiting on server...");
                 string result = reader.ReadLine();

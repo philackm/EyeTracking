@@ -149,7 +149,7 @@ namespace EyeTrackingCore {
                         points.Add(rawPoints[rawIndex]);
                     }
 
-                    VSLocation majorityLocation = MajorityVSLocation(points);
+                    VSLocation majorityLocation = MajorityVSLocation(points.ToArray());
                     Point median = GeometricMedian(ConvertGazePointsToPoints(points));
                     int startTime = points[0].timestamp;
                     int endTime = points[points.Count - 1].timestamp;
@@ -235,12 +235,12 @@ namespace EyeTrackingCore {
             Dictionary<VSLocation, int> counts = new Dictionary<VSLocation, int>();
 
             foreach(GazePoint gazePoint in points) {
-                if (counts.ContainsKey(points.location)) {
+                if (counts.ContainsKey(gazePoint.location)) {
                     // just increment
-                    counts[points.location] = counts[points.location] + 1;
+                    counts[gazePoint.location] = counts[gazePoint.location] + 1;
                 }
                 else {
-                    counts[points.location] = 1;
+                    counts[gazePoint.location] = 1;
                 }
             }
 
@@ -251,7 +251,7 @@ namespace EyeTrackingCore {
             VSLocation majority = VSLocation.Nothing;
             int currentMax = 0;
 
-            foreach(VSLocation key in counts.Keys()) {
+            foreach(VSLocation key in counts.Keys) {
                 if (counts[key] > currentMax) {
                     currentMax = counts[key];
                     majority = key;

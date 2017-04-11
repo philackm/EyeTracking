@@ -76,8 +76,8 @@ namespace EyeTrackingCore {
 
     public enum VSLocation {
         Nothing = 0,
-        Editor = 1,
-        SolutionExplorer = 2,
-        Output = 3
+        SolutionExplorer = 1,
+        Output = 2,
+        Editor = 3
     }
 }
