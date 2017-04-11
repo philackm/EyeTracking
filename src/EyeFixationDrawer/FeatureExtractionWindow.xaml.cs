@@ -322,6 +322,41 @@ namespace EyeFixationDrawer
             return saccades.Where(saccade => saccade.Sector4 == Sector.Down).ToList().Count;
         }
 
+
+        // Need to return an array of List<Fixation>, and then calculate all features for each
+        // element (slice) of the fixations.
+
+        // We can either slice by: number of fixations or time period
+
+        private List<List<Fixation>> SliceFixations(List<Fixation> fixations, int numberOfFixations) {
+            // go through the array, keeping tracking of teh current count and adding each fixation to the current slide
+            // when reach numberOfFixations, add current slice to array, then start a new slice
+
+            List<List<Fixation>> slices = new List<List<Fixation>>();
+            List<Fixation> currentSlice = new List<Fixation>();
+
+            int count = 0;
+            foreach(Fixation fixation in fixations) {
+                count++;
+                currentSlice.Add(fixation);
+                
+                if(count >= numberOfFixations) {
+                    slices.Add(currentSlice);
+                    currentSlide = new List<Fixation>();
+                }
+            }
+
+            return slices;
+        }
+
+        private List<List<Fixation>> SliceFixations(List<Fixation> fixations, double timePeriod) {
+            // go through array adding the elapsed between each fixation, each time adding fixation to slice
+            // when elapsed time sum > timePeriod, then add slide to array and start new slice.
+        }
+
+        // For saccade related features, need to calculate the saccades from the fixations
+        // in its slice.
+
         
     }
 }
