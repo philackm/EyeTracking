@@ -47,7 +47,7 @@ namespace EyeFixationDrawer
             bool includeNames = true;
 
             // On close, create all the slices, then output each feature along with the class.
-            List<Slice> slices = SliceFixations(currentlyLoadedFixations, 30000);
+            List<Slice> slices = SliceFixations(currentlyLoadedFixations, 15000);
 
             // TODO: Need to get the class name to add to the end of each instance.
             System.IO.FileStream fileStream = new System.IO.FileStream("./features.csv", System.IO.FileMode.OpenOrCreate);
@@ -60,12 +60,12 @@ namespace EyeFixationDrawer
                         case RequiredData.Fixation:
                             var fixationExtractor = extractor as FixationFeatureExtractor;
                             if (includeNames) Console.Write(fixationExtractor.featureName + ": ");
-                            Console.Write(fixationExtractor.action(currentlyLoadedFixations) + ", ");
+                            Console.Write(fixationExtractor.action(slice.fixations) + ", ");
                             break;
                         case RequiredData.Saccade:
                             var saccadeExtractor = extractor as SaccadeFeatureExtractor;
                             if (includeNames) Console.Write(saccadeExtractor.featureName + ": ");
-                            Console.Write(saccadeExtractor.action(currentlyLoadedSaccades) + ", ");
+                            Console.Write(saccadeExtractor.action(slice.saccades) + ", ");
                             break;
                     }
                     
@@ -335,11 +335,12 @@ namespace EyeFixationDrawer
 
         // We can either slice by: number of fixations or time period
 
+        /*
         private List<Slice> SliceFixations(List<Fixation> allFixations, int numberOfFixations) {
             // go through the array, keeping tracking of teh current count and adding each fixation to the current slide
             // when reach numberOfFixations, add current slice to array, then start a new slice
 
-            List<Slice> slices = new List<Slice>;
+            List<Slice> slices = new List<Slice>();
             List<Fixation> currentSliceFixations = new List<Fixation>();
             RawToFixationConverter converter = new RawToFixationConverter();
 
@@ -348,7 +349,7 @@ namespace EyeFixationDrawer
             foreach(Fixation fixation in allFixations) {   
                 
                 count++;
-                currencurrentSliceFixationstSlice.Add(fixation);
+                currentSliceFixations.Add(fixation);
                 
                 if(count >= numberOfFixations) {
                     Slice slice = new Slice();
@@ -357,19 +358,20 @@ namespace EyeFixationDrawer
                     slice.saccades = converter.GenerateSaccades(currentSliceFixations);
 
                     slices.Add(slice);
-                    currencurrentSliceFixationstSlide = new List<Fixation>();
+                    currentSliceFixations = new List<Fixation>();
                 }
             }
 
             return slices;
         }
+        */
 
         // timePeriod in milliseconds, e.g., 1000 for 1 second, 300,000 for 5 minutes.
         private List<Slice> SliceFixations(List<Fixation> allFixations, double timePeriod) {
             // go through array adding the elapsed between each fixation, each time adding fixation to slice
             // when elapsed time sum > timePeriod, then add slide to array and start new slice.
 
-            List<Slice> slices = new List<Slice>;
+            List<Slice> slices = new List<Slice>();
             List<Fixation> currentSliceFixations = new List<Fixation>();
             RawToFixationConverter converter = new RawToFixationConverter();
 
@@ -378,7 +380,7 @@ namespace EyeFixationDrawer
             foreach(Fixation fixation in allFixations) {   
                 
                 elapsedTime += (fixation.endTime - fixation.startTime);
-                currencurrentSliceFixationstSlice.Add(fixation);
+                currentSliceFixations.Add(fixation);
                 
                 if(elapsedTime >= timePeriod) {
                     Slice slice = new Slice();
@@ -387,7 +389,10 @@ namespace EyeFixationDrawer
                     slice.saccades = converter.GenerateSaccades(currentSliceFixations);
 
                     slices.Add(slice);
-                    currencurrentSliceFixationstSlide = new List<Fixation>();
+                    currentSliceFixations = new List<Fixation>();
+                    Console.WriteLine("New slice.");
+
+                    elapsedTime = 0;
                 }
             }
 
