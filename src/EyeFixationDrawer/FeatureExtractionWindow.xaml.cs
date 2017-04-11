@@ -45,27 +45,34 @@ namespace EyeFixationDrawer
         {
             List<FixationExtractor> extractors = GetFeatures();
             bool includeNames = true;
-            
-            foreach (var extractor in extractors)
-            {
-                switch(extractor.DataType())
-                {
-                    case RequiredData.Fixation:
-                        var fixationExtractor = extractor as FixationFeatureExtractor;
-                        if (includeNames) Console.Write(fixationExtractor.featureName + ": ");
-                        Console.Write(fixationExtractor.action(currentlyLoadedFixations) + ", ");
-                        break;
-                    case RequiredData.Saccade:
-                        var saccadeExtractor = extractor as SaccadeFeatureExtractor;
-                        if (includeNames) Console.Write(saccadeExtractor.featureName + ": ");
-                        Console.Write(saccadeExtractor.action(currentlyLoadedSaccades) + ", ");
-                        break;
-                }
-                
-            }
-            Console.Write("\n");
-        }
 
+            // On close, create all the slices, then output each feature along with the class.
+            List<Slice> slices = SliceFixations(currentlyLoadedFixations, 30000);
+
+            // TODO: Need to get the class name to add to the end of each instance.
+            System.IO.FileStream fileStream = new System.IO.FileStream("./features.csv", System.IO.FileMode.OpenOrCreate);
+
+            foreach(Slice slice in slices) {
+                foreach (var extractor in extractors)
+                {
+                    switch(extractor.DataType())
+                    {
+                        case RequiredData.Fixation:
+                            var fixationExtractor = extractor as FixationFeatureExtractor;
+                            if (includeNames) Console.Write(fixationExtractor.featureName + ": ");
+                            Console.Write(fixationExtractor.action(currentlyLoadedFixations) + ", ");
+                            break;
+                        case RequiredData.Saccade:
+                            var saccadeExtractor = extractor as SaccadeFeatureExtractor;
+                            if (includeNames) Console.Write(saccadeExtractor.featureName + ": ");
+                            Console.Write(saccadeExtractor.action(currentlyLoadedSaccades) + ", ");
+                            break;
+                    }
+                    
+                }
+                Console.Write("\n");
+            }   
+        }
 
         public enum RequiredData
         {
@@ -328,21 +335,29 @@ namespace EyeFixationDrawer
 
         // We can either slice by: number of fixations or time period
 
-        private List<List<Fixation>> SliceFixations(List<Fixation> fixations, int numberOfFixations) {
+        private List<Slice> SliceFixations(List<Fixation> allFixations, int numberOfFixations) {
             // go through the array, keeping tracking of teh current count and adding each fixation to the current slide
             // when reach numberOfFixations, add current slice to array, then start a new slice
 
-            List<List<Fixation>> slices = new List<List<Fixation>>();
-            List<Fixation> currentSlice = new List<Fixation>();
+            List<Slice> slices = new List<Slice>;
+            List<Fixation> currentSliceFixations = new List<Fixation>();
+            RawToFixationConverter converter = new RawToFixationConverter();
 
             int count = 0;
-            foreach(Fixation fixation in fixations) {
+            
+            foreach(Fixation fixation in allFixations) {   
+                
                 count++;
-                currentSlice.Add(fixation);
+                currencurrentSliceFixationstSlice.Add(fixation);
                 
                 if(count >= numberOfFixations) {
-                    slices.Add(currentSlice);
-                    currentSlide = new List<Fixation>();
+                    Slice slice = new Slice();
+                    
+                    slice.fixations = currentSliceFixations;
+                    slice.saccades = converter.GenerateSaccades(currentSliceFixations);
+
+                    slices.Add(slice);
+                    currencurrentSliceFixationstSlide = new List<Fixation>();
                 }
             }
 
@@ -350,32 +365,38 @@ namespace EyeFixationDrawer
         }
 
         // timePeriod in milliseconds, e.g., 1000 for 1 second, 300,000 for 5 minutes.
-        private List<List<Fixation>> SliceFixations(List<Fixation> fixations, double timePeriod) {
+        private List<Slice> SliceFixations(List<Fixation> allFixations, double timePeriod) {
             // go through array adding the elapsed between each fixation, each time adding fixation to slice
             // when elapsed time sum > timePeriod, then add slide to array and start new slice.
 
-            List<List<Fixation>> slices = new List<List<Fixation>>();
-            List<Fixation> currentSlice = new List<Fixation>();
+            List<Slice> slices = new List<Slice>;
+            List<Fixation> currentSliceFixations = new List<Fixation>();
+            RawToFixationConverter converter = new RawToFixationConverter();
 
             double elapsedTime = 0;
             
-            foreach(Fixation fixation in fixations) {   
+            foreach(Fixation fixation in allFixations) {   
                 
                 elapsedTime += (fixation.endTime - fixation.startTime);
-                currentSlice.Add(fixation);
+                currencurrentSliceFixationstSlice.Add(fixation);
                 
                 if(elapsedTime >= timePeriod) {
-                    slices.Add(currentSlice);
-                    currentSlide = new List<Fixation>();
+                    Slice slice = new Slice();
+                    
+                    slice.fixations = currentSliceFixations;
+                    slice.saccades = converter.GenerateSaccades(currentSliceFixations);
+
+                    slices.Add(slice);
+                    currencurrentSliceFixationstSlide = new List<Fixation>();
                 }
             }
 
             return slices;
         }
 
-        // For saccade related features, need to calculate the saccades from the fixations
-        // in its slice.
-
-        
+        struct Slice {
+            public List<Fixation> fixations;
+            public List<Saccade> saccades;
+        }
     }
 }

@@ -483,7 +483,7 @@ namespace EyeFixationDrawer
             Console.WriteLine("Saving Data...");
 
             System.IO.FileStream fileStream = new System.IO.FileStream("./gazePoints.xml", System.IO.FileMode.OpenOrCreate);
-
+            
             try
             {
                 this.serialiser.Serialize(fileStream, gazePoints);

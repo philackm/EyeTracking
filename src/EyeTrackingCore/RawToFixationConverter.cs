@@ -5,15 +5,24 @@ namespace EyeTrackingCore {
 
     public class RawToFixationConverter {
         
-        private List<GazePoint> rawPoints;
+        public List<GazePoint> rawPoints;
 
         public RawToFixationConverter(List<GazePoint> points) {
             this.rawPoints = points;
         }
 
+        public RawToFixationConverter() {
+            this.rawPoints = null;
+        }
+
         // Converts raw gaze input into fixations.
         public List<Fixation> CalculateFixations(int windowSize, float peakThreshold, float radius) {
             
+            if(rawPoints == null) {
+                Console.WriteLine("RawPoints is null. Unable to calculate fixations.");
+                return null;
+            }
+
             Console.WriteLine("Calculating fixations...");
             List<Point> allPoints = ConvertGazePointsToPoints(rawPoints);
 
