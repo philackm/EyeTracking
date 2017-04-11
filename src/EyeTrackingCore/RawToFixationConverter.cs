@@ -149,10 +149,11 @@ namespace EyeTrackingCore {
                         points.Add(rawPoints[rawIndex]);
                     }
 
+                    VSLocation majorityLocation = MajorityVSLocation(points);
                     Point median = GeometricMedian(ConvertGazePointsToPoints(points));
                     int startTime = points[0].timestamp;
                     int endTime = points[points.Count - 1].timestamp;
-                    Fixation fixation = new Fixation(median.x, median.y, startTime, endTime);
+                    Fixation fixation = new Fixation(median.x, median.y, startTime, endTime, majorityLocation);
                     fixations.Add(fixation);
                 }
 
@@ -227,6 +228,37 @@ namespace EyeTrackingCore {
 
         private float EuclideanDistance(Point a, Point b) {
             return (float)Math.Sqrt((a.x - b.x)*(a.x - b.x) + (a.y - b.y)*(a.y - b.y));
+        }
+
+        private VSLocation MajorityVSLocation(GazePoint[] points) {
+
+            Dictionary<VSLocation, int> counts = new Dictionary<VSLocation, int>();
+
+            foreach(GazePoint gazePoint in points) {
+                if (counts.ContainsKey(points.location)) {
+                    // just increment
+                    counts[points.location] = counts[points.location] + 1;
+                }
+                else {
+                    counts[points.location] = 1;
+                }
+            }
+
+            return MaxInCount(counts);
+        }
+
+        private VSLocation MaxInCount(Dictionary<VSLocation, int> counts) {
+            VSLocation majority = VSLocation.Nothing;
+            int currentMax = 0;
+
+            foreach(VSLocation key in counts.Keys()) {
+                if (counts[key] > currentMax) {
+                    currentMax = counts[key];
+                    majority = key;
+                }
+            }
+
+            return majority; 
         }
 
         // Weiszfeld Algorithm

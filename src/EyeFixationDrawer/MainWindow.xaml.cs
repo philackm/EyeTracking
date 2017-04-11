@@ -26,6 +26,7 @@ namespace EyeFixationDrawer
         // Access to the Tobii eyeX
         private EyeXHost _eyeXHost;
         private GazePointDataStream stream;
+        private bool trackingVSLocation = false;
 
         // GazePoints, Fixations & Saccades
         // TODO: These shouldn't be stored and calculated in the view: MainWindow, (need to refactor all of this)
@@ -62,6 +63,14 @@ namespace EyeFixationDrawer
 
         private SolidColorBrush gazePointBrush = new SolidColorBrush(Color.FromArgb(64, 0, 0, 0));
         private SolidColorBrush saccadeAngleBrush = new SolidColorBrush(Color.FromArgb(64, 255, 0, 0));
+
+        private Dictionary<VSLocation, System.Windows.Media.SolidColorBrush> VSLocationBrushes = 
+            new Dictionary<VSLocation, System.Windows.Media.SolidColorBrush> {
+                [VSLocation.Nothing] = System.Windows.Media.Brushes.Red,
+                [VSLocation.Editor] = System.Windows.Media.Brushes.Orange,
+                [VSLocation.SolutionExplorer] = System.Windows.Media.Brushes.Green,
+                [VSLocation.Output] = System.Windows.Media.Brushes.Blue
+            };
 
         bool shouldDrawAngles = false;
 
@@ -108,7 +117,12 @@ namespace EyeFixationDrawer
         private void StoreGazePoint(object sender, GazePointEventArgs args)
         {
             int elapsedMilliseconds = (int)(GetUnixMillisecondsForNow() - startTime);
-            GazePoint gazePoint = new GazePoint((float)args.X, (float)args.Y, elapsedMilliseconds);
+
+            // If we are tracking Visual Studio locations
+
+            VSLocation location = trackingVSLocation ? (VSLocation)GetVSWindowForScreenPoint(args.X, args.Y) : GetVSLocationVSLocation.Nothing; 
+
+            GazePoint gazePoint = new GazePoint((float)args.X, (float)args.Y, elapsedMilliseconds, location);
             gazePoints.Add(gazePoint);
         }
 
@@ -160,8 +174,10 @@ namespace EyeFixationDrawer
                 double lengthOfFixation = fixation.endTime - fixation.startTime;
                 double seconds = lengthOfFixation / 1000;
 
-                DrawCircle(fixation.x, fixation.y, System.Windows.Media.Brushes.Red, fixationCircleSize);
-                DrawLabel(seconds.ToString(), fixation.x + fixationCircleSize, fixation.y, System.Windows.Media.Brushes.Red);
+                System.Windows.Media.SolidColorBrush brush = VSLocationBrushes[fixation.location];
+
+                DrawCircle(fixation.x, fixation.y, brush, fixationCircleSize);
+                DrawLabel(seconds.ToString(), fixation.x + fixationCircleSize, fixation.y, brush);
             }
         }
 
