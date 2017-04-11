@@ -349,9 +349,28 @@ namespace EyeFixationDrawer
             return slices;
         }
 
+        // timePeriod in milliseconds, e.g., 1000 for 1 second, 300,000 for 5 minutes.
         private List<List<Fixation>> SliceFixations(List<Fixation> fixations, double timePeriod) {
             // go through array adding the elapsed between each fixation, each time adding fixation to slice
             // when elapsed time sum > timePeriod, then add slide to array and start new slice.
+
+            List<List<Fixation>> slices = new List<List<Fixation>>();
+            List<Fixation> currentSlice = new List<Fixation>();
+
+            double elapsedTime = 0;
+            
+            foreach(Fixation fixation in fixations) {   
+                
+                elapsedTime += (fixation.endTime - fixation.startTime);
+                currentSlice.Add(fixation);
+                
+                if(elapsedTime >= timePeriod) {
+                    slices.Add(currentSlice);
+                    currentSlide = new List<Fixation>();
+                }
+            }
+
+            return slices;
         }
 
         // For saccade related features, need to calculate the saccades from the fixations
