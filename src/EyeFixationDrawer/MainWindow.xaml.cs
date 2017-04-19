@@ -41,6 +41,9 @@ namespace EyeFixationDrawer
         private double peakThreshold = 50;
         private double radius = 10;
 
+        // Features
+        List<FeatureExtractionWindow.FeatureExtractor> extractors = null;
+
         // UI Specifics
         // ################
 
@@ -546,10 +549,16 @@ namespace EyeFixationDrawer
             }
         }
 
+        // Features
         private void featureSelectionButton_Click(object sender, RoutedEventArgs e)
         {
-            Window featureExtractionWindow = new FeatureExtractionWindow(calculatedFixations, calculatedSaccades);
+            Window featureExtractionWindow = new FeatureExtractionWindow(calculatedFixations, calculatedSaccades, this);
             featureExtractionWindow.Show();
+        }
+
+        public void SetExtractors(List<FeatureExtractionWindow.FeatureExtractor> extractors)
+        {
+            this.extractors = extractors;
         }
 
         private void saccadeAngleCheckbox_Changed(object sender, RoutedEventArgs e)
@@ -612,6 +621,18 @@ namespace EyeFixationDrawer
 
             int window = GetVSWindowForScreenPoint(screenPoint);
             System.Windows.MessageBox.Show(window.ToString());
+        }
+
+        private void generateDataButton_Click(object sender, RoutedEventArgs e)
+        {
+            if(extractors == null)
+            {
+                System.Windows.MessageBox.Show("Extractors are null. Make sure you have selected the features you want to generate first.");
+                return;
+            }
+
+            Window dataGenerationWindow = new DataGenerationWindow(currentWindowSize, (float)peakThreshold, (float)radius, extractors);
+            dataGenerationWindow.Show();
         }
     }
 }

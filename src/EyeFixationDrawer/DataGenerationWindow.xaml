@@ -1,0 +1,35 @@
+﻿<Window x:Class="EyeFixationDrawer.DataGenerationWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:EyeFixationDrawer"
+        mc:Ignorable="d"
+        Title="DataGenerationWindow" Height="500" Width="600">
+    <Grid>
+        <ListBox Name="dataFileList" HorizontalContentAlignment="Stretch">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid Margin="0,2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="200" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="{Binding fileName}" />
+                        <TextBox Grid.Column="1" Text="{Binding className}"/>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <Rectangle Fill="#ccc" Height="80" VerticalAlignment="Bottom" Margin="0,0,0,0"/>
+        <Button x:Name="loadDataButton" Content="Load GazePoints" Margin="10,0,0,49" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="113" Click="loadDataButton_Click"/>
+        <Button x:Name="generateButton" Content="Generate Instances" Margin="128,0,0,49" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="121" Click="generateButton_Click" />
+
+        <CheckBox x:Name="checkBox15s" Content="15s" HorizontalAlignment="Left" Margin="128,0,0,29" Height="15" VerticalAlignment="Bottom"/>
+        <CheckBox x:Name="checkBox30s" Content="30s" HorizontalAlignment="Left" Margin="171,0,0,29" Height="15" VerticalAlignment="Bottom"/>
+        <CheckBox x:Name="checkBox60s" Content="60s" HorizontalAlignment="Left" Margin="214,0,0,29" Height="15" VerticalAlignment="Bottom"/>
+        <CheckBox x:Name="checkBox90s" Content="90s" HorizontalAlignment="Left" Margin="257,0,0,29" Height="15" VerticalAlignment="Bottom"/>
+
+    </Grid>
+</Window>
