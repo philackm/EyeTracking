@@ -145,7 +145,7 @@ namespace EyeFixationDrawer
                     List<Fixation> fixations = converter.CalculateFixations((int)windowSize, (float)peakThreshold, (float)radius);
 
                     // Now we can slice the fixations for this data file, write it to the csv and append the class for this data file to the end.
-                    List<Slice> slices = SliceFixations(fixations, 10000); // Todo make time variable
+                    List<Slice> slices = SliceFixations(fixations, 15000); // Todo make time variable
 
                     foreach (Slice slice in slices)
                     {
@@ -212,6 +212,7 @@ namespace EyeFixationDrawer
         */
 
         // timePeriod in milliseconds, e.g., 1000 for 1 second, 300,000 for 5 minutes.
+        // slices it with an overlapping window, each successive window overlaps half of the previous window
         private List<Slice> SliceFixations(List<Fixation> allFixations, double timePeriod)
         {
             // go through array adding the elapsed between each fixation, each time adding fixation to slice
@@ -223,12 +224,26 @@ namespace EyeFixationDrawer
 
             double elapsedTime = 0;
 
-            foreach (Fixation fixation in allFixations)
+            int windowCount = 0;
+            double windowMiddle = allFixations[0].startTime + (timePeriod / 2);
+            int savedIndex = -1;
+
+            // basically, we move the window forward timePeriod/2 fixations at a time.
+            // then we go from that fixation, collecting all fixations that are within timePeriod from that fixation
+            for (int i = 0; i < allFixations.Count; i++)
             {
+                Fixation fixation = allFixations[i];
 
                 elapsedTime += (fixation.endTime - fixation.startTime);
                 currentSliceFixations.Add(fixation);
 
+                // check if we are half way through this window, save the index if we are
+                if (savedIndex < 0 && windowMiddle <= fixation.startTime)
+                {
+                    savedIndex = i;
+                }
+
+                // if we found all the fixations within the timePeriod starting from the starting index for this window
                 if (elapsedTime >= timePeriod)
                 {
                     Slice slice = new Slice();
@@ -240,9 +255,25 @@ namespace EyeFixationDrawer
                     currentSliceFixations = new List<Fixation>();
                     Console.WriteLine("New slice.");
 
+                    // reset the time counter
                     elapsedTime = 0;
+
+                    // update the position we have to go back to
+                    i = savedIndex;
+                    // unset this so it is saved in the next round
+                    savedIndex = -1;
+                    // increment slice count
+                    windowCount++;
+                    // calculate the new time that will be the middle of the next sliding window
+                    windowMiddle = allFixations[i].startTime + (timePeriod / 2);
                 }
             }
+
+            // have to add the final (possibly incomplete) slice.
+            Slice incompleteSlice = new Slice();
+            incompleteSlice.fixations = currentSliceFixations;
+            incompleteSlice.saccades = converter.GenerateSaccades(currentSliceFixations);
+            slices.Add(incompleteSlice);
 
             return slices;
         }
@@ -265,6 +296,4 @@ namespace EyeFixationDrawer
             this.className = className;
         }
     }
-
-
 }
