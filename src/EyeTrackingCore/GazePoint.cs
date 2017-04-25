@@ -56,19 +56,28 @@ namespace EyeTrackingCore {
 
         public int timestamp; // milliseconds since start of tracking
         public bool exists; // don't think this is actually needed with tobii eyex
+        public VSLocation location;
 
         public GazePoint() : base(0, 0) {
             this.timestamp = 0;
             this.exists = false;
         }
 
-        public GazePoint(float x, float y, int timestamp) : base(x, y) {
+        public GazePoint(float x, float y, int timestamp, VSLocation location) : base(x, y) {
             this.timestamp = timestamp;
             this.exists = true;
+            this.location = location;
         }
 
         public Point ToPoint() {
             return new Point(this.x, this.y);
         }
+    }
+
+    public enum VSLocation {
+        Nothing = 0,
+        SolutionExplorer = 1,
+        Output = 2,
+        Editor = 3
     }
 }
