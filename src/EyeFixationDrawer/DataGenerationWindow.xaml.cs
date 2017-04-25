@@ -112,67 +112,96 @@ namespace EyeFixationDrawer
             // Get the selected file name and display in a TextBox 
             if (result == true)
             {
-                string saveFileName = saveFileDialog.FileName;
-                bool includeNames = true;
 
-                System.IO.FileStream fileStream = new System.IO.FileStream(saveFileName, System.IO.FileMode.Append);
-                StreamWriter writer = new StreamWriter(fileStream);
+                // Want to generate instances for all of the selected slice times.
 
-                // Write the column names to the top 
-                if (includeNames)
+                foreach (int sliceTime in GetSliceLengths())
                 {
-                    for (int i = 0; i  < extractors.Count - 1; i++)
+                    // Get the name the user gave the file.
+                    string saveFileName = saveFileDialog.FileName;
+                    bool includeNames = true;
+
+                    // Add the slice time to the end of the filename. (We generate as many files as the needed with <saveFileName>_sliceTime.csv as the filename)
+                    string updatedFileName = saveFileName.Insert(saveFileName.Length - 4, String.Format("_{0}s", sliceTime));
+                    Console.WriteLine(sliceTime);
+                    Console.WriteLine(updatedFileName);
+
+                    // Setup the file stream writer.
+                    System.IO.FileStream fileStream = new System.IO.FileStream(updatedFileName, System.IO.FileMode.Append);
+                    StreamWriter writer = new StreamWriter(fileStream);
+                    
+
+                    // Write the column names to the top 
+                    if (includeNames)
                     {
-                        writer.Write(extractors[i].featureName + ", ");
-                    }
-                    writer.Write(extractors[extractors.Count - 1].featureName);
-
-                    writer.Write("\n");
-                    writer.Flush();
-                }
-
-                // We have the fileName to save the instances to, generate all the instances and then save them to the file at this location.
-
-                // Foreach data file loaded we need to get the gazepoints and then convert them to fixations, then we can slice them.
-                foreach (Data dataFile in dataFileList.Items)
-                {
-                    string filename = dataFile.fileName;
-
-                    System.IO.FileStream readFileStream = new System.IO.FileStream(filename, System.IO.FileMode.Open);
-                    this.gazePoints = this.serialiser.Deserialize(readFileStream) as List<GazePoint>;
-
-                    RawToFixationConverter converter = new RawToFixationConverter(gazePoints);
-                    List<Fixation> fixations = converter.CalculateFixations((int)windowSize, (float)peakThreshold, (float)radius);
-
-                    // Now we can slice the fixations for this data file, write it to the csv and append the class for this data file to the end.
-                    List<Slice> slices = SliceFixations(fixations, 15000); // Todo make time variable
-
-                    foreach (Slice slice in slices)
-                    {
-                        foreach (var extractor in extractors)
+                        for (int i = 0; i < extractors.Count - 1; i++)
                         {
-                            switch (extractor.DataType())
-                            {
-                                case FeatureExtractionWindow.RequiredData.Fixation:
-                                    var fixationExtractor = extractor as FeatureExtractionWindow.FixationFeatureExtractor;
-                                    writer.Write(fixationExtractor.action(slice.fixations) + ", ");
-                                    break;
-                                case FeatureExtractionWindow.RequiredData.Saccade:
-                                    var saccadeExtractor = extractor as FeatureExtractionWindow.SaccadeFeatureExtractor;
-                                    writer.Write(saccadeExtractor.action(slice.saccades) + ", ");
-                                    break;
-                            }
-
+                            writer.Write(extractors[i].featureName + ", ");
                         }
+                        writer.Write(extractors[extractors.Count - 1].featureName);
 
-                        writer.Write(dataFile.className);
                         writer.Write("\n");
                         writer.Flush();
                     }
-                }
 
-                writer.Close();
+                    // We have the fileName to save the instances to, generate all the instances and then save them to the file at this location.
+
+                    // Foreach data file loaded we need to get the gazepoints and then convert them to fixations, then we can slice them.
+                    foreach (Data dataFile in dataFileList.Items)
+                    {
+                        string filename = dataFile.fileName;
+
+                        System.IO.FileStream readFileStream = new System.IO.FileStream(filename, System.IO.FileMode.Open);
+                        this.gazePoints = this.serialiser.Deserialize(readFileStream) as List<GazePoint>;
+                        readFileStream.Close();
+
+                        RawToFixationConverter converter = new RawToFixationConverter(gazePoints);
+                        List<Fixation> fixations = converter.CalculateFixations((int)windowSize, (float)peakThreshold, (float)radius);
+
+                        // Now we can slice the fixations for this data file, write it to the csv and append the class for this data file to the end.
+                        List<Slice> slices = SliceFixations(fixations, sliceTime * 1000); // convert sliceTime to milliseconds
+
+                        foreach (Slice slice in slices)
+                        {
+                            foreach (var extractor in extractors)
+                            {
+                                switch (extractor.DataType())
+                                {
+                                    case FeatureExtractionWindow.RequiredData.Fixation:
+                                        var fixationExtractor = extractor as FeatureExtractionWindow.FixationFeatureExtractor;
+                                        writer.Write(fixationExtractor.action(slice.fixations) + ", ");
+                                        break;
+                                    case FeatureExtractionWindow.RequiredData.Saccade:
+                                        var saccadeExtractor = extractor as FeatureExtractionWindow.SaccadeFeatureExtractor;
+                                        writer.Write(saccadeExtractor.action(slice.saccades) + ", ");
+                                        break;
+                                }
+
+                            }
+
+                            writer.Write(dataFile.className);
+                            writer.Write("\n");
+                            writer.Flush();
+                        }
+                    }
+
+                    writer.Close();
+                }
             }
+        }
+
+
+        private int[] GetSliceLengths()
+        {
+            Dictionary<int, bool> sliceLengths = new Dictionary<int, bool>();
+
+            sliceLengths.Add(15, checkBox15s.IsChecked.Value);
+            sliceLengths.Add(30, checkBox30s.IsChecked.Value);
+            sliceLengths.Add(60, checkBox60s.IsChecked.Value);
+            sliceLengths.Add(90, checkBox90s.IsChecked.Value);
+
+            // Only return an array of the keys of the ones that are actually checked.
+            return sliceLengths.Where(kvp => kvp.Value).ToDictionary(i => i.Key, i => i.Value).Keys.ToArray();
         }
 
         // Need to return an array of List<Fixation>, and then calculate all features for each
