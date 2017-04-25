@@ -226,17 +226,32 @@ namespace EyeFixationDrawer
         // Software Eng Fixation Counts
         private double NumberOfEditorFixations(List<Fixation> fixations)
         {
-            return 0;
+            return CountFixationsInLocation(fixations, VSLocation.Editor);
         }
 
         private double NumberOfSolutionExplorerFixations(List<Fixation> fixations)
         {
-            return 0;
+            return CountFixationsInLocation(fixations, VSLocation.SolutionExplorer);
         }
 
         private double NumberOfOutputFixations(List<Fixation> fixations)
         {
-            return 0;
+            return CountFixationsInLocation(fixations, VSLocation.Output);
+        }
+
+        private int CountFixationsInLocation(List<Fixation> fixations, VSLocation vsLocation)
+        {
+            int count = 0;
+
+            foreach (Fixation fixation in fixations)
+            {
+                if (fixation.location == vsLocation)
+                {
+                    count++;
+                }
+            }
+
+            return count;
         }
 
         // Saccade related features
