@@ -7,25 +7,41 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="1000" Width="1777">
     <Grid>
-        <Canvas Margin="0" Name="canvas" Background="White" MouseDown="canvas_MouseLeftButtonDown">
-            <Button x:Name="startButton" Content="Start" Canvas.Left="10" Canvas.Top="10" Width="75" Click="Start_Click"/>
-            <Button x:Name="stopButton" Content="Stop" Canvas.Left="10" Canvas.Top="34" Width="75" Click="Stop_Click"/>
-            <Button x:Name="saveDataButton" Content="Save Data" Canvas.Left="10" Canvas.Top="59" Width="75" Click="SaveData_Click"/>
-            <Button x:Name="drawFixationButton" Content="Draw Fixations" Canvas.Left="10" Canvas.Top="84" Width="100" Click="DrawFixation_Click"/>
-            <Button x:Name="clearFixationButton" Content="Clear Fixations" Canvas.Left="115" Canvas.Top="84" Width="100" Click="ClearFixation_Click"/>
-            <Slider x:Name="windowSizeSlider" Canvas.Left="10" Canvas.Top="271" Width="149" ValueChanged="WindowSize_ValueChanged" Maximum="1"/>
-            <Slider x:Name="peakThresholdSlider" Canvas.Left="10" Canvas.Top="319" Width="149" Maximum="1" ValueChanged="PeakThreshold_ValueChanged"/>
-            <Slider x:Name="radiusSlider" Canvas.Left="10" Canvas.Top="364" Width="149" Maximum="1" ValueChanged="Radius_ValueChanged"/>
-            <Label x:Name="windowSizeLabel" Content="Window Size" Canvas.Left="10" Canvas.Top="245"/>
-            <Label x:Name="peakThresholdLabel" Content="Peak Threshold" Canvas.Left="10" Canvas.Top="293"/>
-            <Label x:Name="radiusLabel" Content="Radius" Canvas.Left="10" Canvas.Top="338"/>
-            <Button x:Name="button" Content="Load Data" Canvas.Left="90" Canvas.Top="59" Width="75" Click="LoadData_Click"/>
-            <Button x:Name="featureSelectionButton" Content="Select Features" Canvas.Left="10" Canvas.Top="109" Width="100" Click="featureSelectionButton_Click"/>
-            <Button x:Name="directionFrequenciesButton" Content="Print Direction Frequencies" Canvas.Left="115" Canvas.Top="109" Width="161" Click="directionFrequenciesButton_Click"/>
-            <CheckBox x:Name="saccadeAngleCheckbox" Content="Draw Saccade Angles" Canvas.Left="10" Canvas.Top="224" Unchecked="saccadeAngleCheckbox_Changed" Checked="saccadeAngleCheckbox_Changed"/>
-            <Button x:Name="sendMessageToServerButton" Content="Send" Canvas.Left="281" Canvas.Top="109" Width="75" Click="sendMessageToServerButton_Click"/>
-            <Button x:Name="generateDataButton" Content="Generate Data" Canvas.Left="10" Canvas.Top="134" Width="100" Click="generateDataButton_Click"/>
+        <Canvas Margin="0,10,0,-10" Name="canvas" Background="White" MouseDown="canvas_MouseLeftButtonDown">
 
         </Canvas>
+
+        <Button x:Name="startButton" Content="Start" Margin="10,10,0,0" Canvas.Left="10" Canvas.Top="10"  Click="Start_Click" Width="75" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+        <Button x:Name="clearButton" Content="Clear All" Margin="10,159,0,0" Canvas.Left="10" Canvas.Top="10" Width="75" VerticalAlignment="Top" HorizontalAlignment="Left" Click="clearButton_Click"/>
+        <Button x:Name="stopButton" Margin="10,34,0,0" Content="Stop" Canvas.Left="10" Canvas.Top="34" Width="75" Click="Stop_Click" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+        <Button x:Name="saveDataButton" Margin="10,59,0,0" Content="Save Data" Canvas.Left="10" Canvas.Top="59" Width="75" Click="SaveData_Click" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+        <Button x:Name="drawFixationButton" Margin="115,84,0,0" Content="Draw Fixations" Canvas.Left="10" Canvas.Top="84" Width="100" Click="DrawFixation_Click" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+        <Button x:Name="clearFixationButton" Margin="10,84,0,0" Content="Clear Fixations" Canvas.Left="115" Canvas.Top="84" Width="100" Click="ClearFixation_Click" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+        <Slider x:Name="windowSizeSlider" Margin="10,271,0,0" Canvas.Left="10" Canvas.Top="271" Width="149" ValueChanged="WindowSize_ValueChanged" Maximum="1" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+        <Slider x:Name="peakThresholdSlider" Margin="10,319,0,0" Canvas.Left="10" Canvas.Top="319" Width="149" Maximum="1" ValueChanged="PeakThreshold_ValueChanged" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+        <Slider x:Name="radiusSlider" Margin="10,364,0,0" Canvas.Left="10" Canvas.Top="364" Width="149" Maximum="1" ValueChanged="Radius_ValueChanged" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+        <Label x:Name="windowSizeLabel" Margin="10,245,0,0" Content="Window Size" Canvas.Left="10" Canvas.Top="245" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+        <Label x:Name="peakThresholdLabel" Margin="10,293,0,0" Content="Peak Threshold" Canvas.Left="10" Canvas.Top="293" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+        <Label x:Name="radiusLabel" Margin="10,338,0,0" Content="Radius" Canvas.Left="10" Canvas.Top="338" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+        <Button x:Name="button" Margin="90,59,0,0" Content="Load Data" Canvas.Left="90" Canvas.Top="59" Width="75" Click="LoadData_Click" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+        <Button x:Name="featureSelectionButton" Margin="10,109,0,0" Content="Select Features" Canvas.Left="10" Canvas.Top="109" Width="100" Click="featureSelectionButton_Click" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+        <Button x:Name="directionFrequenciesButton" Margin="115,109,0,0" Content="Print Direction Frequencies" Canvas.Left="115" Canvas.Top="109" Width="161" Click="directionFrequenciesButton_Click" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+        <CheckBox x:Name="saccadeAngleCheckbox" Margin="10,224,0,0" Content="Draw Saccade Angles" Canvas.Left="10" Canvas.Top="224" Unchecked="saccadeAngleCheckbox_Changed" Checked="saccadeAngleCheckbox_Changed" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+        <Button x:Name="sendMessageToServerButton" Margin="281,109,0,0" Content="Send" Canvas.Left="281" Canvas.Top="109" Width="75" Click="sendMessageToServerButton_Click" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+        <Button x:Name="generateDataButton" Margin="10,134,0,0" Content="Generate Data" Canvas.Left="10" Canvas.Top="134" Width="100" Click="generateDataButton_Click" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+
+        <!-- Data collection convenience helpers. -->
+        <Label x:Name="statusLabel" Content="STOPPED" Canvas.Left="1452" Canvas.Top="24" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,16,10,0" Width="400" HorizontalContentAlignment="Right"/>
+        <Button x:Name="selectFolderButton" Content="SELECT FOLDER" Margin="0,59,10,0" Width="150" VerticalAlignment="Top" HorizontalAlignment="Right" Click="selectFolderButton_Click"/>
+        <TextBox x:Name="participantTextBox" Height="23" Canvas.Left="965" TextWrapping="Wrap" Text="participant#" Canvas.Top="327" Width="150" Margin="0,84,10,0" HorizontalAlignment="Right" VerticalAlignment="Top"/>
+
+        <Button x:Name="readButton" Content="READ" Margin="0,123,10,0" Canvas.Left="10" Canvas.Top="10" Width="75" VerticalAlignment="Top" HorizontalAlignment="Right" Click="readButton_Click"/>
+        <Button x:Name="watchButton" Content="WATCH" Margin="0,148,10,0" Canvas.Left="10" Canvas.Top="34" VerticalAlignment="Top" HorizontalAlignment="Right" Width="75" Click="watchButton_Click"/>
+        <Button x:Name="searchButton" Content="SEARCH" Margin="0,173,10,0" Canvas.Left="10" Canvas.Top="59" Width="75" VerticalAlignment="Top" HorizontalAlignment="Right" Click="searchButton_Click"/>
+        <Button x:Name="gameButton" Content="GAME" Margin="0,198,10,0" Width="75" VerticalAlignment="Top" HorizontalAlignment="Right" Click="gameButton_Click"/>
+
+        <Button x:Name="determineOutputButton" Content="DETERMINE OUTPUT" Margin="0,231,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="150" Click="determineOutputButton_Click"/>
+        <Button x:Name="refactorButton" Content="REFACTOR FUNCTIONS" Margin="0,256,10,0" Width="150" VerticalAlignment="Top" HorizontalAlignment="Right" Click="refactorButton_Click"/>
+        <Button x:Name="writeFunctionButton" Content="WRITE FUNCTION" Margin="0,281,10,0" Width="150" VerticalAlignment="Top" HorizontalAlignment="Right" Click="writeFunctionButton_Click"/>
     </Grid>
 </Window>

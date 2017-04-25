@@ -16,6 +16,8 @@ using System.IO.Pipes;
 using System.IO;
 using Path = System.Windows.Shapes.Path;
 
+using System.Text.RegularExpressions;
+
 namespace EyeFixationDrawer
 {
     /// <summary>
@@ -47,6 +49,12 @@ namespace EyeFixationDrawer
         // UI Specifics
         // ################
 
+        private enum CircleType
+        {
+            FixationCircle,
+            GazeCircle
+        }
+
         // Determines the maximum settable by the UI
         private int maxWindowSize = 100;
         private double maxPeakThreshold = 200;
@@ -72,6 +80,13 @@ namespace EyeFixationDrawer
 
         private double startTime;
 
+        // Collecting user data.
+        private string participantFolderLocation = null;
+
+        private RecordingState currentRecordingState = RecordingState.Stopped;
+        private object currentRecorder = null;
+        private string participantID = null;
+
         // Initialisation
         // ##############
 
@@ -81,9 +96,6 @@ namespace EyeFixationDrawer
             serialiser = new XmlSerializer(gazePoints.GetType());
 
             InitSliders();
-
-            // Make note of when we started recording.
-            startTime = GetUnixMillisecondsForNow();
 
             gazePointBrush.Freeze();
             saccadeAngleBrush.Freeze();
@@ -126,14 +138,14 @@ namespace EyeFixationDrawer
         // Gaze Points
         private void DrawCircleAtGazePoint(object sender, GazePointEventArgs args)
         {
-            DrawCircle(args.X, args.Y, gazePointBrush, gazePointCircleSize);
+            DrawCircle(args.X, args.Y, gazePointBrush, gazePointCircleSize, CircleType.GazeCircle);
         }
 
         private void DrawAllGazePoints()
         {
             foreach (GazePoint gazePoint in gazePoints)
             {
-                DrawCircle(gazePoint.x, gazePoint.y, gazePointBrush, gazePointCircleSize);
+                DrawCircle(gazePoint.x, gazePoint.y, gazePointBrush, gazePointCircleSize, CircleType.GazeCircle);
             }
         }
 
@@ -163,12 +175,12 @@ namespace EyeFixationDrawer
                 double lengthOfFixation = fixation.endTime - fixation.startTime;
                 double seconds = lengthOfFixation / 1000;
 
-                DrawCircle(fixation.x, fixation.y, System.Windows.Media.Brushes.Red, fixationCircleSize);
+                DrawCircle(fixation.x, fixation.y, System.Windows.Media.Brushes.Red, fixationCircleSize, CircleType.FixationCircle);
                 DrawLabel(seconds.ToString(), fixation.x + fixationCircleSize, fixation.y, System.Windows.Media.Brushes.Red);
             }
         }
 
-        private void DrawCircle(double screenX, double screenY, SolidColorBrush brush, double size)
+        private void DrawCircle(double screenX, double screenY, SolidColorBrush brush, double size, CircleType circleType)
         {
             this.Dispatcher.Invoke((Action)(() =>
             {
@@ -182,11 +194,11 @@ namespace EyeFixationDrawer
                 Canvas.SetTop(ellipse, canvasXY.Y);
 
                 // This is absolutey horrible, needs to change.
-                if (brush == System.Windows.Media.Brushes.Red)
+                if (circleType == CircleType.FixationCircle)
                 {
                     fixationCircles.Add(ellipse);
                 }
-                else if (brush == System.Windows.Media.Brushes.Black)
+                else if (circleType == CircleType.GazeCircle)
                 {
                     gazeCircles.Add(ellipse);
                 }
@@ -422,6 +434,8 @@ namespace EyeFixationDrawer
         // Start collecting gaze data button
         private void Start_Click(object sender, RoutedEventArgs e)
         {
+            // Make note of when we started recording.
+            startTime = GetUnixMillisecondsForNow();
             InitEyeTracker();
         }
 
@@ -483,25 +497,33 @@ namespace EyeFixationDrawer
         // Currently just saves the raw gaze points out to an xml file in the same directory as the executable.
         private void SaveData_Click(object sender, RoutedEventArgs e)
         {
-            Console.WriteLine("Saving Data...");
-
-            System.IO.FileStream fileStream = new System.IO.FileStream("./gazePoints.xml", System.IO.FileMode.OpenOrCreate);
-            
-            try
-            {
-                this.serialiser.Serialize(fileStream, gazePoints);
-            }
-            catch (Exception exception)
-            {
-                Console.WriteLine(exception.Message);
-            }
-            finally
-            {
-                fileStream.Close();
-            }
-
-            Console.WriteLine("Save complete!");
+            Console.WriteLine("Getting location for save file...");
+            string saveFileLocation = GetFileLocationForSave();
+            SerialiseGazePoints(saveFileLocation);
         }
+
+        private void SerialiseGazePoints(string fileLocation)
+        {
+            if (fileLocation != null)
+            {
+                System.IO.FileStream fileStream = new System.IO.FileStream(fileLocation, System.IO.FileMode.OpenOrCreate);
+
+                try
+                {
+                    this.serialiser.Serialize(fileStream, gazePoints);
+                }
+                catch (Exception exception)
+                {
+                    Console.WriteLine(exception.Message);
+                }
+                finally
+                {
+                    fileStream.Close();
+                }
+
+                Console.WriteLine("Serialisation complete!");
+            }
+        }  
 
         private void LoadData_Click(object sender, RoutedEventArgs e)
         {
@@ -547,6 +569,23 @@ namespace EyeFixationDrawer
                 }
 
             }
+        }
+
+        private string GetFileLocationForSave()
+        {
+            // Create OpenFileDialog 
+            Microsoft.Win32.SaveFileDialog saveFileDialog = new Microsoft.Win32.SaveFileDialog();
+
+            // Display OpenFileDialog by calling ShowDialog method 
+            Nullable<bool> result = saveFileDialog.ShowDialog();
+
+            // Get the selected file name and display in a TextBox 
+            if (result == true)
+            {
+                return saveFileDialog.FileName;
+            }
+
+            return null;
         }
 
         // Features
@@ -614,6 +653,8 @@ namespace EyeFixationDrawer
 
         private void canvas_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
+            // This is only for testing.
+            /*
             int x = (int)e.GetPosition(canvas).X;
             int y = (int)e.GetPosition(canvas).Y;
 
@@ -621,8 +662,27 @@ namespace EyeFixationDrawer
 
             int window = GetVSWindowForScreenPoint(screenPoint);
             System.Windows.MessageBox.Show(window.ToString());
+            */
         }
 
+        private void clearButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Remove UI
+            ClearGazePoints();
+            RemoveFixationCircles();
+            RemoveSaccades();
+            RemoveLabels();
+
+            // Clear the things we have actually calculated.
+            gazePoints = new List<GazePoint>();
+            calculatedFixations = new List<Fixation>();
+            calculatedSaccades = new List<Saccade>();
+        }
+
+
+
+
+        // Data collection helpers.
         private void generateDataButton_Click(object sender, RoutedEventArgs e)
         {
             if(extractors == null)
@@ -633,6 +693,131 @@ namespace EyeFixationDrawer
 
             Window dataGenerationWindow = new DataGenerationWindow(currentWindowSize, (float)peakThreshold, (float)radius, extractors);
             dataGenerationWindow.Show();
+        }
+
+        private enum RecordingState
+        {
+            Recording,
+            Stopped
+        }
+
+
+
+        private void RecordingButtonClick(object sender, RoutedEventArgs e)
+        {
+            switch(currentRecordingState)
+            {
+                // not currently recording
+                case RecordingState.Stopped:
+                    // Have to make sure we have a place to save.
+                    if(FolderHasBeenChosen())
+                    {
+                        Start_Click(sender, e);
+
+                        // Update the status label.
+                        participantID = participantTextBox.Text;
+                        statusLabel.Content = String.Format("{0} RECORDING {1}", GetTextOfSender(sender), participantID);
+
+                        // Record who requested this and change the recording state.
+                        currentRecorder = sender;
+                        currentRecordingState = RecordingState.Recording;
+                    }
+                    else
+                    {
+                        MessageBox.Show("Please choose a directory first.");
+                    }
+                    
+                    break;
+                // currently recording
+                case RecordingState.Recording:
+                    // only do something if it was the same requester that started that wanted to stop
+                    if(currentRecorder == sender)
+                    {
+                        // Stop recording.
+                        Stop_Click(sender, e);
+                        statusLabel.Content = "STOPPED";
+
+                        // Save the gazepoints to a file, making sure it saves the file in the right place with the correct activity saved to it
+                        string activityRaw = GetTextOfSender(currentRecorder).ToLower();
+                        string activity = Regex.Replace(activityRaw, " ", "", RegexOptions.Compiled);
+                        string saveFilename = String.Format("{0}_{1}.xml", participantID, activity);
+                        string saveLocation = String.Format("{0}/{1}", participantFolderLocation, saveFilename);
+
+                        SerialiseGazePoints(saveLocation);
+
+                        // Clear everything out.
+                        clearButton_Click(sender, e);
+                        currentRecorder = null;
+                        currentRecordingState = RecordingState.Stopped;
+                    }
+                    
+                    break;
+            }
+        }
+
+        private string GetTextOfSender(object sender)
+        {
+            Button button = (Button)sender;
+            return button.Content.ToString();
+        }
+
+        private bool FolderHasBeenChosen()
+        {
+            return participantFolderLocation != null;
+        }
+
+        private void selectFolderButton_Click(object sender, RoutedEventArgs e)
+        {
+            participantFolderLocation = GetFolderLocation();
+        }
+
+        private string GetFolderLocation()
+        {
+            // Get a place to save for this participant.
+            System.Windows.Forms.FolderBrowserDialog dialog = new System.Windows.Forms.FolderBrowserDialog();
+            System.Windows.Forms.DialogResult result = dialog.ShowDialog();
+
+            if (result == System.Windows.Forms.DialogResult.OK)
+            {
+                return dialog.SelectedPath;
+            }
+
+            return null;
+        }
+
+        private void readButton_Click(object sender, RoutedEventArgs e)
+        {
+            RecordingButtonClick(sender, e);
+        }
+
+        private void watchButton_Click(object sender, RoutedEventArgs e)
+        {
+            RecordingButtonClick(sender, e);
+        }
+
+        private void searchButton_Click(object sender, RoutedEventArgs e)
+        {
+            RecordingButtonClick(sender, e);
+        }
+
+        private void gameButton_Click(object sender, RoutedEventArgs e)
+        {
+            RecordingButtonClick(sender, e);
+        }
+
+        private void determineOutputButton_Click(object sender, RoutedEventArgs e)
+        {
+            RecordingButtonClick(sender, e);
+        }
+
+        private void refactorButton_Click(object sender, RoutedEventArgs e)
+        {
+            RecordingButtonClick(sender, e);
+        }
+
+        private void writeFunctionButton_Click(object sender, RoutedEventArgs e)
+        {
+            RecordingButtonClick(sender, e);
         }
     }
 }
