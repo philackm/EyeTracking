@@ -99,6 +99,10 @@ namespace EyeFixationDrawer
             items.Add(new FixationFeatureExtractor() { featureName = "Fixation Rate (per second)", include = true, action = FixationRatePerSecond });
             items.Add(new FixationFeatureExtractor() { featureName = "Fixation Slope", include = true, action = FixationSlope });
 
+            items.Add(new FixationFeatureExtractor() { featureName = "Number of VSEditor Fixations", include = true, action = NumberOfEditorFixations });
+            items.Add(new FixationFeatureExtractor() { featureName = "Number of VSExplorer Fixations", include = true, action = NumberOfSolutionExplorerFixations });
+            items.Add(new FixationFeatureExtractor() { featureName = "Number of VSOutput Fixations", include = true, action = NumberOfOutputFixations });
+
             // Saccade related features.
             items.Add(new SaccadeFeatureExtractor() { featureName = "Number of Short Saccades", include = true, action = NumberOfShortSaccades });
             items.Add(new SaccadeFeatureExtractor() { featureName = "Number of Long Saccades", include = true, action = NumberOfLongSaccades });
@@ -153,6 +157,7 @@ namespace EyeFixationDrawer
             return featuresToExtract;
         }
         
+        // Features extracted from fixations
         private double FixationDurationMean(List<Fixation> fixations)
         {
             double sum = 0;
@@ -218,6 +223,23 @@ namespace EyeFixationDrawer
             }
         }
 
+        // Software Eng Fixation Counts
+        private double NumberOfEditorFixations(List<Fixation> fixations)
+        {
+            return 0;
+        }
+
+        private double NumberOfSolutionExplorerFixations(List<Fixation> fixations)
+        {
+            return 0;
+        }
+
+        private double NumberOfOutputFixations(List<Fixation> fixations)
+        {
+            return 0;
+        }
+
+        // Saccade related features
         private double NumberOfShortSaccades(List<Saccade> saccades)
         {
             int count = 0;
