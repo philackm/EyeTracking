@@ -56,7 +56,7 @@ namespace EyeTrackingCore
                 [Token.ShortLeft] = "Sl", [Token.MediumLeft] = "Ml", [Token.LongLeft] = "Ll",
                 [Token.ShortDown] = "Sd", [Token.MediumDown] = "Md", [Token.LongDown] = "Ld",
 
-                [Token.Brief] = "B", [Token.Hold] = "H"
+                [Token.Brief] = "Br", [Token.Hold] = "Ho"
             };
 
         private string TokenToString(Token token)
