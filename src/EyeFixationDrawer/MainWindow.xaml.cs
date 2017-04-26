@@ -848,5 +848,11 @@ namespace EyeFixationDrawer
         {
             trackingVSLocation = includeVSLocationCheckbox.IsChecked ?? false;
         }
+
+        private void showBookButton_Click(object sender, RoutedEventArgs e)
+        {
+            Wordbook saccadeBook = new Wordbook(calculatedSaccades);
+            MessageBox.Show(saccadeBook.Book);
+        }
     }
 }
