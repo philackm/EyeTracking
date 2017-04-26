@@ -43,5 +43,7 @@
         <Button x:Name="determineOutputButton" Content="DETERMINE OUTPUT" Margin="0,231,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="150" Click="determineOutputButton_Click"/>
         <Button x:Name="refactorButton" Content="REFACTOR FUNCTIONS" Margin="0,256,10,0" Width="150" VerticalAlignment="Top" HorizontalAlignment="Right" Click="refactorButton_Click"/>
         <Button x:Name="writeFunctionButton" Content="WRITE FUNCTION" Margin="0,281,10,0" Width="150" VerticalAlignment="Top" HorizontalAlignment="Right" Click="writeFunctionButton_Click"/>
+
+        <CheckBox x:Name="includeVSLocationCheckbox" Margin="0,319,39,0" Content="Include VSLocation" Canvas.Left="10" Canvas.Top="224" VerticalAlignment="Top" HorizontalAlignment="Right" Width="121" Checked="includeVSLocationCheckbox_Changed" Unchecked="includeVSLocationCheckbox_Changed"/>
     </Grid>
 </Window>

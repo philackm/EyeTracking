@@ -105,6 +105,7 @@ namespace EyeFixationDrawer
 
             // Saccade related features.
             items.Add(new SaccadeFeatureExtractor() { featureName = "Number of Short Saccades", include = true, action = NumberOfShortSaccades });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of Medium Saccades", include = true, action = NumberOfMediumSaccades });
             items.Add(new SaccadeFeatureExtractor() { featureName = "Number of Long Saccades", include = true, action = NumberOfLongSaccades });
 
             // Saccade direction counts. (36 features, one for each 10 degree bucket)
@@ -257,26 +258,26 @@ namespace EyeFixationDrawer
         // Saccade related features
         private double NumberOfShortSaccades(List<Saccade> saccades)
         {
-            int count = 0;
+            return CountSaccadesOfType(saccades, SaccadeType.Short);
+        }
 
-            foreach (var saccade in saccades)
-            {
-                if (saccade.Type == SaccadeType.Short)
-                {
-                    count++;
-                }
-            }
-
-            return count;
+        private double NumberOfMediumSaccades(List<Saccade> saccades)
+        {
+            return CountSaccadesOfType(saccades, SaccadeType.Medium);
         }
 
         private double NumberOfLongSaccades(List<Saccade> saccades)
+        {
+            return CountSaccadesOfType(saccades, SaccadeType.Long);
+        }
+
+        private int CountSaccadesOfType(List<Saccade> saccades, SaccadeType type)
         {
             int count = 0;
 
             foreach (var saccade in saccades)
             {
-                if (saccade.Type == SaccadeType.Long)
+                if (saccade.Type == type)
                 {
                     count++;
                 }

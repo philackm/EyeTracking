@@ -28,7 +28,7 @@ namespace EyeFixationDrawer
         // Access to the Tobii eyeX
         private EyeXHost _eyeXHost;
         private GazePointDataStream stream;
-        private bool trackingVSLocation = true;
+        private bool trackingVSLocation = false;
 
         // GazePoints, Fixations & Saccades
         // TODO: These shouldn't be stored and calculated in the view: MainWindow, (need to refactor all of this)
@@ -81,6 +81,14 @@ namespace EyeFixationDrawer
                 [VSLocation.Editor] = System.Windows.Media.Brushes.Orange,
                 [VSLocation.SolutionExplorer] = System.Windows.Media.Brushes.Green,
                 [VSLocation.Output] = System.Windows.Media.Brushes.Blue
+            };
+
+        private Dictionary<SaccadeType, System.Windows.Media.SolidColorBrush> SaccadeTypeBrushes =
+            new Dictionary<SaccadeType, System.Windows.Media.SolidColorBrush>
+            {
+                [SaccadeType.Short] = System.Windows.Media.Brushes.Red,
+                [SaccadeType.Medium] = System.Windows.Media.Brushes.Green,
+                [SaccadeType.Long] = System.Windows.Media.Brushes.Blue
             };
 
         bool shouldDrawAngles = false;
@@ -292,7 +300,7 @@ namespace EyeFixationDrawer
                 line.Y2 = end.Y + (fixationCircleSize / 2);
 
                 line.StrokeThickness = saccadeLineWidth;
-                line.Stroke = s.Type == SaccadeType.Long ? System.Windows.Media.Brushes.Red : System.Windows.Media.Brushes.Blue;
+                line.Stroke = SaccadeTypeBrushes[s.Type];
 
                 saccadeLines.Add(line);
                 canvas.Children.Add(line);
@@ -631,7 +639,7 @@ namespace EyeFixationDrawer
             {
                 var client = new NamedPipeClientStream("VSServerPipe");
                 Console.WriteLine("Sending message to server.");
-                client.Connect();
+                client.Connect(200);
                 StreamReader reader = new StreamReader(client);
                 StreamWriter writer = new StreamWriter(client);
 
@@ -655,7 +663,7 @@ namespace EyeFixationDrawer
                     return Int32.Parse(result);
                 }
             }
-            catch(InvalidOperationException e)
+            catch(Exception e)
             {
                 Console.WriteLine(e.Message);
                 return 0;
@@ -834,6 +842,11 @@ namespace EyeFixationDrawer
         private void writeFunctionButton_Click(object sender, RoutedEventArgs e)
         {
             RecordingButtonClick(sender, e);
+        }
+
+        private void includeVSLocationCheckbox_Changed(object sender, RoutedEventArgs e)
+        {
+            trackingVSLocation = includeVSLocationCheckbox.IsChecked ?? false;
         }
     }
 }

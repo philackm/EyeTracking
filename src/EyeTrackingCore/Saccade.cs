@@ -7,8 +7,9 @@ namespace EyeTrackingCore
     // Long is defined to be a saccade > 1.1 degrees
     public enum SaccadeType
     {
-        Long,
-        Short
+        Short,
+        Medium,
+        Long
     }
 
     public enum Sector
@@ -140,10 +141,29 @@ namespace EyeTrackingCore
         // pixelspercm is the pixel density of the display
         private SaccadeType CalculateSaccadeType(double distanceFromEyesToMonitor, double thresholdAngle, double pixelsPerCM)
         {
+            // TODO: Update this to use actual values calculated from the standard deviation.
+
+            /*
+            // Using <= 1.1 degrees from distance of 60cm at 96 ppi to classify as short, otherwise long
             // Calculate visual distance of threshold in pixels. (Takes into account pixel density.)
             double visualDistanceThreshold = (Math.Tan(DegreesToRadians(thresholdAngle)) * distanceFromEyesToMonitor) * pixelsPerCM;
             SaccadeType type = this.Distance > visualDistanceThreshold ? SaccadeType.Long : SaccadeType.Short;
             return type;
+            */
+
+            // arbitrary values being used at the moment
+            if(this.Distance < 200)
+            {
+                return SaccadeType.Short;
+            }
+            else if(this.Distance < 600)
+            {
+                return SaccadeType.Medium;
+            }
+            else
+            {
+                return SaccadeType.Long;
+            }
         }
 
         // direction is in radians.
