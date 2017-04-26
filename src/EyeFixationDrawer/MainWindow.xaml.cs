@@ -83,12 +83,6 @@ namespace EyeFixationDrawer
                 [VSLocation.Output] = System.Windows.Media.Brushes.Blue
             };
 
-        enum CircleType
-        {
-            Gaze,
-            Fixation
-        }
-
         bool shouldDrawAngles = false;
         private double saccadeAngleRadius = 25;
 
