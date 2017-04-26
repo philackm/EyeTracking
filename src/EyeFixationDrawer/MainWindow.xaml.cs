@@ -189,7 +189,7 @@ namespace EyeFixationDrawer
                 double seconds = lengthOfFixation / 1000;
 
                 System.Windows.Media.SolidColorBrush brush = VSLocationBrushes[fixation.location];
-                DrawCircle(fixation.x, fixation.y, System.Windows.Media.Brushes.Red, fixationCircleSize, CircleType.FixationCircle);
+                DrawCircle(fixation.x, fixation.y, brush, fixationCircleSize, CircleType.FixationCircle);
                 DrawLabel(seconds.ToString(), fixation.x + fixationCircleSize, fixation.y, brush);
             }
         }
