@@ -852,6 +852,17 @@ namespace EyeFixationDrawer
 
         private void showBookButton_Click(object sender, RoutedEventArgs e)
         {
+
+            Wordbook wordbook = new Wordbook(calculatedFixations, calculatedSaccades);
+
+            wordbook.LocalAlignment("AAAT", "GAGAGAGAGGAGGAAGATAGAT");
+            wordbook.LocalAlignment("SrSrSrSrLl", wordbook.SaccadeBook);
+            wordbook.LocalAlignment("SdSdSd", wordbook.SaccadeBook);
+            wordbook.LocalAlignment("MdMdMd", "MdSrMd");
+
+            // Commenting out temporarily for testing local alignment
+
+            // Testing wordbooks.
             Wordbook saccadeBook = new Wordbook(calculatedSaccades);
             MessageBox.Show(saccadeBook.SaccadeBook);
 
