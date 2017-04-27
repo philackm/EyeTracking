@@ -17,6 +17,7 @@ using System.IO;
 using Path = System.Windows.Shapes.Path;
 
 using System.Text.RegularExpressions;
+using System.Linq;
 
 namespace EyeFixationDrawer
 {
@@ -852,7 +853,35 @@ namespace EyeFixationDrawer
         private void showBookButton_Click(object sender, RoutedEventArgs e)
         {
             Wordbook saccadeBook = new Wordbook(calculatedSaccades);
-            MessageBox.Show(saccadeBook.Book);
+            MessageBox.Show(saccadeBook.SaccadeBook);
+
+            Wordbook fixationBook = new Wordbook(calculatedFixations);
+            MessageBox.Show(fixationBook.FixationBook);
+
+            MessageBox.Show(fixationBook.VSLocationBook);
+
+            double numberOfBriefs = fixationBook.fixationTokens.Aggregate(0, (acc, next) => next == EyeTrackingCore.Token.Brief ? acc + 1 : acc);
+            double numberOfHolds = fixationBook.fixationTokens.Aggregate(0, (acc, next) => next == EyeTrackingCore.Token.Hold ? acc + 1 : acc);
+
+            MessageBox.Show((numberOfBriefs / numberOfHolds).ToString());
+
+            foreach (KeyValuePair<string, int> keyValuePair in saccadeBook.SortedSaccadeWordCount(4))
+            {
+                Console.Write(keyValuePair.Key + ": ");
+                Console.WriteLine(keyValuePair.Value);
+            }
+
+            foreach (KeyValuePair<string, int> keyValuePair in fixationBook.SortedFixationWordCount(4))
+            {
+                Console.Write(keyValuePair.Key + ": ");
+                Console.WriteLine(keyValuePair.Value);
+            }
+
+            foreach (KeyValuePair<string, int> keyValuePair in fixationBook.SortedLocationWordCount(4))
+            {
+                Console.Write(keyValuePair.Key + ": ");
+                Console.WriteLine(keyValuePair.Value);
+            }
         }
     }
 }
