@@ -1,0 +1,59 @@
+PROBLEM 1:
+
+int x = 2;
+int y = 3;
+
+x = x + y;
+y = x - y;
+x = x - y;
+
+printf("x is %d\n", x);
+printf("y is %d\n", y);
+
+OUTPUT:
+x is 3
+y is 2
+
+
+
+PROBLEM 2:
+int iX = 0, iNum = 2, iSum = 3;
+	while(iX <= 5)	
+	{
+		iSum = iSum + iX;
+		iX = iX + 2;
+		iNum++;
+	}
+printf("iNum is %d\n", iNum);
+
+OUTPUT:
+
+iNum is 5
+
+
+PROBLEM 3:
+
+
+int foo(int a) {
+	return a * a;
+}
+
+int main() {
+	int y = 2;
+
+	for(int i = 0; i < 5; i++) {
+		if(i % 2 == 0) {
+			Console.WriteLine(String.Format("{0}", i + foo(y));
+		}
+		else {
+			Console.WriteLine(String.Format("{0}", foo(i));	
+		}
+	}		
+}
+
+OUTPUT:
+4
+1
+6
+9
+8
