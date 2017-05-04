@@ -835,7 +835,7 @@ namespace EyeFixationDrawer
             RecordingButtonClick(sender, e);
         }
 
-        private void refactorButton_Click(object sender, RoutedEventArgs e)
+        private void debugButton_Click(object sender, RoutedEventArgs e)
         {
             RecordingButtonClick(sender, e);
         }
