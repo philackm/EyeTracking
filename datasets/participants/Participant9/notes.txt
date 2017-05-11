@@ -1,0 +1,5 @@
+- tracker during WATCH stopped half way through and disconnected
+- glasses were worn
+- no time for read
+- no time for write
+- participant had never used anything outside of mathlab, was not capable at debugging in c#
