@@ -280,12 +280,12 @@ namespace EyeFixationDrawer
         }
 
         // Saccades
-        private void DrawSaccades()
+        private void DrawSaccades(List<Saccade> saccades)
         {
             //Saccade previous = null; // testing
 
             // Draw the saccade lines.
-            foreach (Saccade s in calculatedSaccades)
+            foreach (Saccade s in saccades)
             {
                 EyeTrackingCore.Point from = s.From;
                 EyeTrackingCore.Point to = s.To;
@@ -320,7 +320,7 @@ namespace EyeFixationDrawer
             // Draw the angle arcs.
             if (shouldDrawAngles)
             {
-                foreach (Saccade s in calculatedSaccades)
+                foreach (Saccade s in saccades)
                 {
                     DrawAngleArc(s);
                 }
@@ -473,7 +473,7 @@ namespace EyeFixationDrawer
         private void DrawFixation_Click(object sender, RoutedEventArgs e)
         {
             DrawFixations();
-            DrawSaccades();
+            DrawSaccades(calculatedSaccades);
         }
 
         // Clear fixation button
@@ -892,6 +892,169 @@ namespace EyeFixationDrawer
             {
                 Console.Write(keyValuePair.Key + ": ");
                 Console.WriteLine(keyValuePair.Value);
+            }
+        }
+
+        private void showBookCountsButton_Click(object sender, RoutedEventArgs e)
+        {
+            Wordbook saccadeBook = new Wordbook(calculatedSaccades);
+            MessageBox.Show(saccadeBook.SaccadeBook);
+
+            string book = saccadeBook.SaccadeBook;
+            int windowSize = 4; // 4 directions in a row, eg, SrSrSrLl
+
+
+            Dictionary<string, int> counts = new Dictionary<string, int>();
+            for(int i = 0; i < book.Length - windowSize * 2; i += 2) {
+
+                string current = book.Substring(i, windowSize * 2);
+
+                if (counts.ContainsKey(current))
+                {
+                    // the segment has already been seen, just increment.
+                    int currentCount = counts[current];
+                    counts[current] = ++currentCount;
+                }
+                else
+                {
+                    // the segment hasnt been seen, set it to 1.
+                    counts[current] = 1;
+                }
+            }
+
+            var countsList = counts.ToList();
+            countsList.Sort((pair1, pair2) => pair1.Value.CompareTo(pair2.Value));
+
+            foreach (KeyValuePair<string, int> kvp in countsList)
+            {
+                Console.WriteLine(String.Format("{0}:{1}", kvp.Key, kvp.Value));
+            }
+
+        }
+
+        private void localAlignmentButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Find long lines.
+            List<Token> lineAtom = new List<Token> { Token.ShortRight, Token.ShortRight, Token.ShortRight, Token.ShortRight, Token.LongLeft };
+
+            Wordbook saccadeBook = new Wordbook(calculatedSaccades);
+            List<Token> y = saccadeBook.saccadeTokens;
+
+            var deltaTable = saccadeBook.CreateLineDeltaTable();
+            int threshold = 21;
+
+            saccadeBook.LocalAlignment(lineAtom, y, deltaTable, threshold);
+
+
+            // Find horizontal focal points.
+            List<Token> horizontalFocalAtom = new List<Token> { Token.ShortRight, Token.ShortLeft, Token.ShortLeft, Token.ShortRight};
+
+            var focalDelta = saccadeBook.CreateHorizontalFocalPointDeltaTable();
+            int focalThreshold = 32;
+
+            saccadeBook.LocalAlignment(horizontalFocalAtom, y, focalDelta, focalThreshold);
+
+            // Find vertical focal points.
+            List<Token> verticalFocalAtom = new List<Token> { Token.ShortUp, Token.ShortDown, Token.ShortDown, Token.ShortUp };
+
+            var vfocalDelta = saccadeBook.CreateVerticalFocalPointDeltaTable();
+            int vfocalThreshold = 32;
+
+            saccadeBook.LocalAlignment(verticalFocalAtom, y, vfocalDelta, vfocalThreshold);
+
+            // Find right string.
+            List<Token> rightStringAtom = new List<Token> { Token.ShortRight, Token.ShortRight, Token.ShortRight, Token.ShortRight };
+
+            var rightStringDelta = saccadeBook.CreateRightStringDeltaTable();
+            int rightStringThreshold = 7;
+
+            saccadeBook.LocalAlignment(rightStringAtom, y, rightStringDelta, rightStringThreshold);
+
+        }
+
+        
+
+        private void drawNextFocalPointButton_Click(object sender, RoutedEventArgs e)
+        {
+            DrawNextRightString();
+        }
+
+        static int current = 0;
+        private void DrawNextFocalPoint()
+        {
+            Wordbook saccadeBook = new Wordbook(calculatedSaccades);
+            List<Token> y = saccadeBook.saccadeTokens;
+
+            // Find horizontal focal points.
+            List<Token> horizontalFocalAtom = new List<Token> { Token.ShortRight, Token.ShortLeft, Token.ShortLeft, Token.ShortRight };
+
+            var focalDelta = saccadeBook.CreateHorizontalFocalPointDeltaTable();
+            int focalThreshold = 32;
+
+            var locations = saccadeBook.GetLocationsOfLocalMatches(horizontalFocalAtom, y, focalDelta, focalThreshold);
+
+            RemoveLabels();
+            RemoveFixationCircles();
+            RemoveSaccades();
+
+            if (current < locations.Count)
+            {
+                var location = locations[current];
+                var saccadesToDraw = calculatedSaccades.GetRange(location.Item1, location.Item2);
+                DrawSaccades(saccadesToDraw);
+                current++;
+            }
+        }
+
+        private void DrawNextLine()
+        {
+            Wordbook saccadeBook = new Wordbook(calculatedSaccades);
+            List<Token> y = saccadeBook.saccadeTokens;
+
+            // Find line.
+            List<Token> lineAtom = new List<Token> { Token.ShortRight, Token.ShortRight, Token.ShortRight, Token.ShortRight, Token.LongLeft };
+
+            var focalDelta = saccadeBook.CreateLineDeltaTable();
+            int focalThreshold = 21;
+
+            var locations = saccadeBook.GetLocationsOfLocalMatches(lineAtom, y, focalDelta, focalThreshold);
+
+            RemoveLabels();
+            RemoveFixationCircles();
+            RemoveSaccades();
+
+            if (current < locations.Count)
+            {
+                var location = locations[current];
+                var saccadesToDraw = calculatedSaccades.GetRange(location.Item1, location.Item2);
+                DrawSaccades(saccadesToDraw);
+                current++;
+            }
+        }
+
+        private void DrawNextRightString()
+        {
+            Wordbook saccadeBook = new Wordbook(calculatedSaccades);
+            List<Token> y = saccadeBook.saccadeTokens;
+
+            // Find line.
+            List<Token> rightStringAtom = new List<Token> { Token.ShortRight, Token.ShortRight, Token.ShortRight, Token.ShortRight };
+
+            var rightStringDelta = saccadeBook.CreateRightStringDeltaTable();
+            int rightStringThreshold = 7;
+
+            var locations = saccadeBook.GetLocationsOfLocalMatches(rightStringAtom, y, rightStringDelta, rightStringThreshold);
+
+            RemoveLabels();
+            RemoveFixationCircles();
+            RemoveSaccades();
+
+            if (current < locations.Count)
+            {
+                var location = locations[current];
+                var saccadesToDraw = calculatedSaccades.GetRange(location.Item1, location.Item2);
+                DrawSaccades(saccadesToDraw);
+                current++;
             }
         }
     }
