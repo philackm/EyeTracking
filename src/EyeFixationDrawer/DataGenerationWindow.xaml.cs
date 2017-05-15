@@ -240,6 +240,57 @@ namespace EyeFixationDrawer
         }
         */
 
+        // number of slices = total time for fixations in ms / (timePeriod / 2)
+        private List<Slice> SliceFixations(List<Fixation> allFixations, double timePeriod)
+        {
+            List<Slice> slices = new List<Slice>();
+            RawToFixationConverter converter = new RawToFixationConverter();
+
+            double halfTimePeriod = timePeriod / 2;
+
+            // increment some counter by halfTimePeriod until it is < length of all fixations - a single time period
+
+            Fixation finalFixation = allFixations.Last();
+            for (double start = 0; start < finalFixation.endTime - timePeriod; start += halfTimePeriod)
+            {
+                double windowStart = start;
+                double windowEnd = start + timePeriod;
+
+                // Get the fixations within this window
+                List<Fixation> fixationsInWindow = GetFixationsInTimePeriod(windowStart, windowEnd, allFixations);
+
+                // As long as there was at least 1 fixation in that window
+                if (fixationsInWindow.Count > 0)
+                {
+                    // Create a new slice with those fixations.
+                    Slice slice = new Slice();
+                    slice.fixations = fixationsInWindow;
+                    slice.saccades = converter.GenerateSaccades(fixationsInWindow);
+                    slices.Add(slice);
+                }
+            }
+
+            return slices;
+        }
+
+        List<Fixation> GetFixationsInTimePeriod(double windowStart, double windowEnd, List<Fixation> allFixations)
+        {
+            List<Fixation> fixationsInWindow = new List<Fixation>();
+
+            foreach(Fixation fixation in allFixations)
+            {
+                if(fixation.startTime >= windowStart && fixation.startTime <= windowEnd)
+                {
+                    fixationsInWindow.Add(fixation);
+                }
+            }
+
+            return fixationsInWindow;
+        }
+
+        /*
+        // What the hell was I even doing here...
+
         // timePeriod in milliseconds, e.g., 1000 for 1 second, 300,000 for 5 minutes.
         // slices it with an overlapping window, each successive window overlaps half of the previous window
         private List<Slice> SliceFixations(List<Fixation> allFixations, double timePeriod)
@@ -277,6 +328,13 @@ namespace EyeFixationDrawer
                 // if we found all the fixations within the timePeriod starting from the starting index for this window
                 if (elapsedTime >= timePeriod)
                 {
+                    if (savedIndex == -1)
+                    {
+                        // If we get here, it means, that savedIndex was never set to the index.
+                        // That means, "we never reached the half way through this window" checkpoint.
+                        Console.WriteLine("breaking");
+                    }
+
                     Slice slice = new Slice();
 
                     slice.fixations = currentSliceFixations;
@@ -308,6 +366,7 @@ namespace EyeFixationDrawer
 
             return slices;
         }
+        */
 
         struct Slice
         {
