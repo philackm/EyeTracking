@@ -271,6 +271,8 @@ namespace EyeFixationDrawer
                 {
                     savedIndex = i;
                 }
+                // BUG: MAYBE: If there is missing data and a big jump in time, we will never set savedIndex to the middle index.
+                //          This means windowMiddle will try to be set to -1 once we have reached the elapsedTime.
 
                 // if we found all the fixations within the timePeriod starting from the starting index for this window
                 if (elapsedTime >= timePeriod)

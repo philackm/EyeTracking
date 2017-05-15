@@ -103,6 +103,16 @@ namespace EyeFixationDrawer
             items.Add(new FixationFeatureExtractor() { featureName = "Number of VSExplorer Fixations", include = true, action = NumberOfSolutionExplorerFixations });
             items.Add(new FixationFeatureExtractor() { featureName = "Number of VSOutput Fixations", include = true, action = NumberOfOutputFixations });
 
+            items.Add(new FixationFeatureExtractor() { featureName = "BriefToHoldRatio", include = true, action = BriefToHoldRatio });
+
+            items.Add(new FixationFeatureExtractor() { featureName = "DistractionUp", include = true, action = DistractionUp });
+            items.Add(new FixationFeatureExtractor() { featureName = "DistractionRight", include = true, action = DistractionRight });
+            items.Add(new FixationFeatureExtractor() { featureName = "DistractionDown", include = true, action = DistractionDown });
+            items.Add(new FixationFeatureExtractor() { featureName = "DistractionLeft", include = true, action = DistractionLeft });
+
+
+
+
             // Saccade related features.
             items.Add(new SaccadeFeatureExtractor() { featureName = "Number of Short Saccades", include = true, action = NumberOfShortSaccades });
             items.Add(new SaccadeFeatureExtractor() { featureName = "Number of Medium Saccades", include = true, action = NumberOfMediumSaccades });
@@ -159,6 +169,7 @@ namespace EyeFixationDrawer
         }
         
         // Features extracted from fixations
+        // #################################
         private double FixationDurationMean(List<Fixation> fixations)
         {
             double sum = 0;
@@ -224,7 +235,43 @@ namespace EyeFixationDrawer
             }
         }
 
+        private double BriefToHoldRatio(List<Fixation> fixations)
+        {
+            Wordbook fixationBook = new Wordbook(fixations);
+
+            double numberOfBriefs = fixationBook.fixationTokens.Aggregate(0, (acc, next) => next == EyeTrackingCore.Token.Brief ? acc + 1 : acc);
+            double numberOfHolds = fixationBook.fixationTokens.Aggregate(0, (acc, next) => next == EyeTrackingCore.Token.Hold ? acc + 1 : acc);
+
+            return (numberOfBriefs / numberOfHolds);
+        }
+
+        // TODO: Update with actual screen resolution.
+        double screenWidth = 1680;
+        double screenHeight = 1050;
+        double buffer = 50;
+
+        private double DistractionUp(List<Fixation> fixations)
+        {
+            return fixations.Aggregate(0, (acc, fixation) => fixation.y < -buffer ? acc + 1 : acc);
+        }
+
+        private double DistractionRight(List<Fixation> fixations)
+        {
+            return fixations.Aggregate(0, (acc, fixation) => (fixation.x > screenWidth + buffer && 0 < fixation.y && fixation.y < screenHeight) ? acc + 1 : acc);
+        }
+
+        private double DistractionLeft(List<Fixation> fixations)
+        {
+            return fixations.Aggregate(0, (acc, fixation) => (fixation.x < -buffer && 0 < fixation.y && fixation.y < screenHeight) ? acc + 1 : acc);
+        }
+
+        private double DistractionDown(List<Fixation> fixations)
+        {
+            return fixations.Aggregate(0, (acc, fixation) => fixation.y > screenHeight + buffer ? acc + 1 : acc);
+        }
+
         // Software Eng Fixation Counts
+        // ############################
         private double NumberOfEditorFixations(List<Fixation> fixations)
         {
             return CountFixationsInLocation(fixations, VSLocation.Editor);
@@ -256,6 +303,7 @@ namespace EyeFixationDrawer
         }
 
         // Saccade related features
+        // ########################
         private double NumberOfShortSaccades(List<Saccade> saccades)
         {
             return CountSaccadesOfType(saccades, SaccadeType.Short);
@@ -353,6 +401,8 @@ namespace EyeFixationDrawer
         {
             return saccades.Where(saccade => saccade.Sector4 == Sector.Down).ToList().Count;
         }
+
+        
 
     }
 }

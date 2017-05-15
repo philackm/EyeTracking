@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 // TODO:
-// Other features: Distractions (off-screen left, off-screen down, etc.), Brief to Hold ratio, Area of 95% of fixations, ...
+// Other features: Area of 95% of fixations, ...
 
 namespace EyeTrackingCore
 {
