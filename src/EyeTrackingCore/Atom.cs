@@ -29,7 +29,7 @@ namespace EyeTrackingCore
 
         private void FindAtoms()
         {
-            foreach(AtomType type in LineTypes) // TODO, once implemented all delta tables need to find atoms for all atomtypes, not just line types.
+            foreach(AtomType type in ComparisonTypes) // TODO, once implemented all delta tables need to find atoms for all atomtypes, not just line types.
             {
                 List<Token> x = AtomDeltaTables.AtomDefinitions[type];
                 List<Token> y = wordbook.saccadeTokens;
@@ -126,7 +126,10 @@ namespace EyeTrackingCore
         public static Dictionary<AtomType, List<Token>> AtomDefinitions = new Dictionary<AtomType, List<Token>>
         {
             [AtomType.MediumLine] = new List<Token> { Token.ShortRight, Token.ShortRight, Token.ShortRight, Token.ShortRight, Token.MediumLeft },
-            [AtomType.LongLine] = new List<Token> { Token.ShortRight, Token.ShortRight, Token.ShortRight, Token.ShortRight, Token.LongLeft }
+            [AtomType.LongLine] = new List<Token> { Token.ShortRight, Token.ShortRight, Token.ShortRight, Token.ShortRight, Token.LongLeft },
+
+            [AtomType.CompareHorizontal] = new List<Token> { Token.ShortRight, Token.ShortLeft, Token.ShortRight, Token.ShortLeft },
+            [AtomType.CompareVertical] = new List<Token> { Token.ShortUp, Token.ShortDown, Token.ShortUp, Token.ShortDown }
 
             // Add other atom definitions here for all atomtypes.
         };
@@ -138,7 +141,10 @@ namespace EyeTrackingCore
         public static Dictionary<AtomType, TableCreator> DeltaDefinitions = new Dictionary<AtomType, TableCreator>
         {
             [AtomType.MediumLine] = CreateMediumLineDeltaTable,
-            [AtomType.LongLine] = CreateLongLineDeltaTable
+            [AtomType.LongLine] = CreateLongLineDeltaTable,
+
+            [AtomType.CompareHorizontal] = CreateCompareHorizontalDeltaTable,
+            [AtomType.CompareVertical] = CreateCompareVerticalDeltaTable
 
             // Add other atom definitions here for all atomtypes.
         };
@@ -146,7 +152,10 @@ namespace EyeTrackingCore
         public static Dictionary<AtomType, int> ThresholdDefinitions = new Dictionary<AtomType, int>
         {
             [AtomType.MediumLine] = 21,
-            [AtomType.LongLine] = 21
+            [AtomType.LongLine] = 21,
+
+            [AtomType.CompareHorizontal] = 7,
+            [AtomType.CompareVertical] = 7
 
             // Add other atom definitions here for all atomtypes.
         };
@@ -361,6 +370,76 @@ namespace EyeTrackingCore
 
             return deltaTable;
         } // SrSrSrSr
+
+        public static Dictionary<DeltaKey, int> CreateCompareHorizontalDeltaTable() // SrSlSrSl
+        {
+            Dictionary<DeltaKey, int> deltaTable = CreateInitialTable(-2);
+
+            // Want to match lefts and rights mostly, perfect match == 8
+            DeltaKey key = new DeltaKey("Sr", "Sr");
+            deltaTable[key] = 2;
+
+            key = new DeltaKey("Sl", "Sl");
+            deltaTable[key] = 2;
+
+            foreach (Token y in tokens)
+            {
+                // Penalise any kind of insertions
+                key = new DeltaKey("", Wordbook.TokenToString(y));
+                deltaTable[key] = -2;
+
+                // Penalise any kind of deletion
+                key = new DeltaKey(Wordbook.TokenToString(y), "");
+                deltaTable[key] = -2;
+            }
+
+            // Insertions of short ups and downs are okay
+            key = new DeltaKey("", "Su");
+            deltaTable[key] = -1;
+
+            key = new DeltaKey("", "Sd");
+            deltaTable[key] = -1;
+
+            // Therefore, for one insertion of an up or down, the threshold will be 7 or higher.
+            // Perfect match is 8, minus 1 for 1 insertion of an Su or Sd.
+
+            return deltaTable;
+        }
+
+        public static Dictionary<DeltaKey, int> CreateCompareVerticalDeltaTable() // SuSdSuSd
+        {
+            Dictionary<DeltaKey, int> deltaTable = CreateInitialTable(-2);
+
+            // Want to match lefts and rights mostly, perfect match == 8
+            DeltaKey key = new DeltaKey("Su", "Su");
+            deltaTable[key] = 2;
+
+            key = new DeltaKey("Sd", "Sd");
+            deltaTable[key] = 2;
+
+            foreach (Token y in tokens)
+            {
+                // Penalise any kind of insertions
+                key = new DeltaKey("", Wordbook.TokenToString(y));
+                deltaTable[key] = -2;
+
+                // Penalise any kind of deletion
+                key = new DeltaKey(Wordbook.TokenToString(y), "");
+                deltaTable[key] = -2;
+            }
+
+            // Insertions of short lefts and rights are okay
+            key = new DeltaKey("", "Sl");
+            deltaTable[key] = -1;
+
+            key = new DeltaKey("", "Sr");
+            deltaTable[key] = -1;
+
+            // Therefore, for one insertion of an up or down, the threshold will be 7 or higher.
+            // Perfect match is 8, minus 1 for 1 insertion of an Su or Sd.
+
+            return deltaTable;
+        }
 
         // scanning
 

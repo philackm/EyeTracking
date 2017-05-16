@@ -933,24 +933,34 @@ namespace EyeFixationDrawer
             Wordbook saccadeBook = new Wordbook(calculatedSaccades);
             AtomBook atomBook = new AtomBook(saccadeBook);
 
-            MessageBox.Show(atomBook.atoms[AtomType.MediumLine].Count.ToString());
-            MessageBox.Show(atomBook.atoms[AtomType.LongLine].Count.ToString());
+            MessageBox.Show(atomBook.atoms[AtomType.CompareHorizontal].Count.ToString());
+            MessageBox.Show(atomBook.atoms[AtomType.CompareVertical].Count.ToString());
         }
         
         private void drawNextFocalPointButton_Click(object sender, RoutedEventArgs e)
         {
-            DrawNextMediumLine();
+            DrawNextAtom(AtomType.MediumLine);
+        }
+
+        private void drawNextHorizontalCompareButton_Click(object sender, RoutedEventArgs e)
+        {
+            DrawNextAtom(AtomType.CompareHorizontal);
+        }
+
+        private void drawNextVertCompare_Click(object sender, RoutedEventArgs e)
+        {
+            DrawNextAtom(AtomType.CompareVertical);
         }
 
         static int current = 0;
-        private void DrawNextMediumLine()
+        private void DrawNextAtom(AtomType type)
         {
             Wordbook saccadeBook = new Wordbook(calculatedSaccades);
             AtomBook atomBook = new AtomBook(saccadeBook);
 
-            List<Atom> mediumLines = atomBook.atoms[AtomType.MediumLine];
+            List<Atom> mediumLines = atomBook.atoms[type];
 
-            if(current < mediumLines.Count)
+            if (current < mediumLines.Count)
             {
                 RemoveLabels();
                 RemoveFixationCircles();
@@ -961,6 +971,11 @@ namespace EyeFixationDrawer
             {
                 current = 0;
             }
+        }
+
+        private void resetButton_Click(object sender, RoutedEventArgs e)
+        {
+            current = 0;
         }
     }
 }

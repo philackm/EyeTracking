@@ -48,6 +48,9 @@
         <CheckBox x:Name="includeVSLocationCheckbox" Margin="0,319,39,0" Content="Include VSLocation" Canvas.Left="10" Canvas.Top="224" VerticalAlignment="Top" HorizontalAlignment="Right" Width="121" Checked="includeVSLocationCheckbox_Changed" Unchecked="includeVSLocationCheckbox_Changed"/>
         <Button x:Name="showBookCountsButton" Margin="220,134,0,0" Content="Show Book Counts" Width="110" VerticalAlignment="Top" HorizontalAlignment="Left" Click="showBookCountsButton_Click" />
         <Button x:Name="localAlignmentButton" Margin="335,134,0,0" Content="Show Line Count" Width="110" VerticalAlignment="Top" HorizontalAlignment="Left" Click="localAlignmentButton_Click" />
-        <Button x:Name="drawNextFocalPointButton" Margin="335,159,0,0" Content="Draw Next Focal" Width="110" VerticalAlignment="Top" HorizontalAlignment="Left" Click="drawNextFocalPointButton_Click" />
+        <Button x:Name="drawNextFocalPointButton" Margin="335,159,0,0" Content="Next Medium Line" Width="110" VerticalAlignment="Top" HorizontalAlignment="Left" Click="drawNextFocalPointButton_Click" />
+        <Button x:Name="drawNextHorizontalCompareButton" Margin="335,184,0,0" Content="Next Hori Compare" Width="110" VerticalAlignment="Top" HorizontalAlignment="Left" Click="drawNextHorizontalCompareButton_Click" />
+        <Button x:Name="drawNextVertCompare" Margin="335,209,0,0" Content="Next Vert Compare" Width="110" VerticalAlignment="Top" HorizontalAlignment="Left" Click="drawNextVertCompare_Click" />
+        <Button x:Name="resetButton" Margin="335,234,0,0" Content="Reset" Width="110" VerticalAlignment="Top" HorizontalAlignment="Left" Click="resetButton_Click" />
     </Grid>
 </Window>
