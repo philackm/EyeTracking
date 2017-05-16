@@ -140,10 +140,10 @@ namespace EyeTrackingCore {
 
             // 6b: fixations that are closer together than a specified range are merged together.
 
-            float shortestDistance = 0;
+            // float shortestDistance = 0; // used in 6b
             List<Fixation> fixations = new List<Fixation>();
 
-            while(shortestDistance < radius) {
+            //while(shortestDistance < radius) { // used in 6b
                 
                 fixations.Clear();
 
@@ -166,7 +166,9 @@ namespace EyeTrackingCore {
                     fixations.Add(fixation);
                 }
 
+
                 // 6b
+                /*
                 shortestDistance = float.MaxValue;
 
                 for(int i = 1; i <= fixations.Count - 1; i++) {
@@ -184,7 +186,7 @@ namespace EyeTrackingCore {
 
                     if (shortestDistance < radius) {
                         try {
-                            peakIndices.RemoveAt(index);
+                            peakIndices.RemoveAt(index); // BUG: When removing peakIndices, all indices move down a slot, can remove at index and expect all other indices to stay the same...
                         }
                         catch(Exception e) {
                             Console.WriteLine(e.Message);
@@ -193,7 +195,7 @@ namespace EyeTrackingCore {
                         }
                     }
                 }
-            }
+            } */
 
             // Testing
             /*

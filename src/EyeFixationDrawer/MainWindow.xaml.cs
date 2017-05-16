@@ -42,8 +42,8 @@ namespace EyeFixationDrawer
 
         // Fixation algorithm arguments
         private int currentWindowSize = 13;
-        private double peakThreshold = 50;
-        private double radius = 10;
+        private double peakThreshold = 25;
+        private double radius = 1;
 
         // Features
         List<FeatureExtractionWindow.FeatureExtractor> extractors = null;
