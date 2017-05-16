@@ -38,11 +38,22 @@ namespace EyeTrackingCore
 
                 List<Tuple<int, int>> atomLocations = Matching.GetLocationsOfLocalMatches(x, y, delta, threshold);
 
-                foreach(Tuple<int, int> location in atomLocations)
+                if(atomLocations.Count == 0)
                 {
-                    Atom atom = new Atom(type, wordbook.saccadesUsedToGenerateBook.GetRange(location.Item1, location.Item2));
-                    InsertAtom(atom, atoms);
+                    // there were no instances of this atom found in the data.
+                    // just set an empty dict
+                    atoms[type] = new List<Atom>();
                 }
+                else
+                {
+                    // We actually found some instances of this atom.
+                    foreach (Tuple<int, int> location in atomLocations)
+                    {
+                        Atom atom = new Atom(type, wordbook.saccadesUsedToGenerateBook.GetRange(location.Item1, location.Item2));
+                        InsertAtom(atom, atoms);
+                    }
+                }
+                
             }
         }
 
