@@ -110,7 +110,7 @@ namespace EyeFixationDrawer
             items.Add(new FixationFeatureExtractor() { featureName = "DistractionDown", include = true, action = DistractionDown });
             items.Add(new FixationFeatureExtractor() { featureName = "DistractionLeft", include = true, action = DistractionLeft });
 
-            items.Add(new FixationFeatureExtractor() { featureName = "Area Containing Fixations (95%)", include = true, action = AreaContainingFixations });
+            items.Add(new FixationFeatureExtractor() { featureName = "Area Containing Fixations (90%)", include = true, action = AreaContainingFixations });
 
 
 
@@ -284,7 +284,7 @@ namespace EyeFixationDrawer
             var distances = DistancesFromPointToOtherPoints(centre, fixations);
             distances.Sort((x,y) => x.Item2.CompareTo(y.Item2));
 
-            // drop the fixations that were in the top 5% of
+            // drop the fixations that were in the top 10% of
             int numToDrop = (int)(distances.Count * 0.10);
             var dropped = distances.GetRange(0, distances.Count - numToDrop);
 
