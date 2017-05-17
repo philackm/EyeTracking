@@ -11,50 +11,66 @@ namespace EyeTrackingCore
 {
     public class AtomBook
     {
-        private readonly Wordbook wordbook;
-        
-        public readonly AtomType[] ScanningTypes = { AtomType.ScanRightUp, AtomType.ScanUpLeft, AtomType.ScanLeftDown, AtomType.ScanDownRight,
-                                                     AtomType.ScanHorizontal, AtomType.ScanVertical, AtomType.ScanBox };
+        private Wordbook wordbook;
+        private int numberOfScans = 0;
+        private int numberOfStrings = 0;
+        private int numberOfComparisons = 0;
+        private int numberOfLines = 0;
+
         public readonly AtomType[] StringTypes = { AtomType.StringUp, AtomType.StringRight, AtomType.StringDown, AtomType.StringLeft };
-        public readonly AtomType[] ComparisonTypes = { AtomType.CompareHorizontal, AtomType.CompareVertical };
         public readonly AtomType[] LineTypes = { AtomType.MediumLine, AtomType.LongLine };
+        public readonly AtomType[] ComparisonTypes = { AtomType.CompareHorizontal, AtomType.CompareVertical, AtomType.CompareHorizontalAlt, AtomType.CompareVerticalAlt };
+        public readonly AtomType[] ScanningTypes = { AtomType.ScanRightUp, AtomType.ScanUpLeft, AtomType.ScanLeftDown, AtomType.ScanDownRight,
+                                                     AtomType.ScanHorizontal, AtomType.ScanVertical,
+                                                     AtomType.ScanRightUpAlt, AtomType.ScanUpLeftAlt, AtomType.ScanLeftDownAlt, AtomType.ScanDownRightAlt,
+                                                     AtomType.ScanHorizontalAlt, AtomType.ScanVerticalAlt};
 
         public readonly Dictionary<AtomType, List<Atom>> atoms = new Dictionary<AtomType, List<Atom>>();
 
         public AtomBook(Wordbook wordbook)
         {
             this.wordbook = wordbook;
-            FindAtoms();
+            this.numberOfStrings = FindAtoms(StringTypes);
+            this.numberOfLines = FindAtoms(LineTypes);
+            this.numberOfComparisons = FindAtoms(ComparisonTypes);
+            this.numberOfScans = FindAtoms(ScanningTypes);
         }
 
-        private void FindAtoms()
+        // Stores atoms it finds in the 'atoms' dictionary under its type and returns the total number of atoms it found.
+        private int FindAtoms(AtomType[] types)
         {
-            foreach(AtomType type in ComparisonTypes) // TODO, once implemented all delta tables need to find atoms for all atomtypes, not just line types.
+            int count = 0;
+
+            foreach (AtomType type in types)
             {
-                List<Token> x = AtomDeltaTables.AtomDefinitions[type];
-                List<Token> y = wordbook.saccadeTokens;
-                Dictionary<DeltaKey, int> delta = AtomDeltaTables.DeltaDefinitions[type]();
-                int threshold = AtomDeltaTables.ThresholdDefinitions[type];
+                if (AtomDeltaTables.AtomDefinitions.Keys.Contains(type)) {
+                    List<Token> x = AtomDeltaTables.AtomDefinitions[type];
+                    List<Token> y = wordbook.saccadeTokens;
+                    Dictionary<DeltaKey, int> delta = AtomDeltaTables.DeltaDefinitions[type]();
+                    int threshold = AtomDeltaTables.ThresholdDefinitions[type];
 
-                List<Tuple<int, int>> atomLocations = Matching.GetLocationsOfLocalMatches(x, y, delta, threshold);
+                    List<Tuple<int, int>> atomLocations = Matching.GetLocationsOfLocalMatches(x, y, delta, threshold);
 
-                if(atomLocations.Count == 0)
-                {
-                    // there were no instances of this atom found in the data.
-                    // just set an empty dict
-                    atoms[type] = new List<Atom>();
-                }
-                else
-                {
-                    // We actually found some instances of this atom.
-                    foreach (Tuple<int, int> location in atomLocations)
+                    if (atomLocations.Count == 0)
                     {
-                        Atom atom = new Atom(type, wordbook.saccadesUsedToGenerateBook.GetRange(location.Item1, location.Item2));
-                        InsertAtom(atom, atoms);
+                        // there were no instances of this atom found in the data.
+                        // just set an empty dict
+                        atoms[type] = new List<Atom>();
+                    }
+                    else
+                    {
+                        // We actually found some instances of this atom.
+                        foreach (Tuple<int, int> location in atomLocations)
+                        {
+                            Atom atom = new Atom(type, wordbook.saccadesUsedToGenerateBook.GetRange(location.Item1, location.Item2));
+                            InsertAtom(atom, atoms);
+                            count++;
+                        }
                     }
                 }
-                
             }
+
+            return count;
         }
 
         private void InsertAtom(Atom atom, Dictionary<AtomType, List<Atom>> dictionary)
@@ -72,10 +88,22 @@ namespace EyeTrackingCore
             }
         }
 
-        // AtomBook.NumberOfScans
-        // AtomBook.NumberOfLines
-        // AtomBook.NumberOfComparisons
-        // AtomBook.NumberOfStrings
+        public int NumberOfStrings
+        {
+            get { return this.numberOfStrings; }
+        }
+        public int NumberOfLines
+        {
+            get { return this.numberOfLines; }
+        }
+        public int NumberOfComparisons
+        {
+            get { return this.numberOfComparisons; }
+        }
+        public int NumberOfScans
+        {
+            get { return this.numberOfScans; }
+        }
     }
 
     public class Atom
@@ -94,19 +122,21 @@ namespace EyeTrackingCore
 
     public enum AtomType
     {
-        // scanning
-        ScanRightUp, ScanUpLeft, ScanLeftDown, ScanDownRight,
-        ScanHorizontal, ScanVertical,
-        ScanBox,
-
-        // strings
+        // String Atoms
         StringUp, StringRight, StringDown, StringLeft,
 
-        // comparisons
+        // Line Atoms
+        ShortLine, MediumLine, LongLine,
+        
+        // Compare Atoms
         CompareHorizontal, CompareVertical,
+        CompareHorizontalAlt, CompareVerticalAlt,
 
-        // lines
-        ShortLine, MediumLine, LongLine
+        // Scanning Atoms
+        ScanRightUp, ScanUpLeft, ScanLeftDown, ScanDownRight,
+        ScanHorizontal, ScanVertical,
+        ScanRightUpAlt, ScanUpLeftAlt, ScanLeftDownAlt, ScanDownRightAlt,
+        ScanHorizontalAlt, ScanVerticalAlt
     }
 
     public struct DeltaKey
@@ -125,13 +155,39 @@ namespace EyeTrackingCore
     {
         public static Dictionary<AtomType, List<Token>> AtomDefinitions = new Dictionary<AtomType, List<Token>>
         {
+            // String Atoms
+            [AtomType.StringUp] = new List<Token> { Token.ShortUp, Token.ShortUp, Token.ShortUp, Token.ShortUp },
+            [AtomType.StringRight] = new List<Token> { Token.ShortRight, Token.ShortRight, Token.ShortRight, Token.ShortRight },
+            [AtomType.StringDown] = new List<Token> { Token.ShortDown, Token.ShortDown, Token.ShortDown, Token.ShortDown },
+            [AtomType.StringLeft] = new List<Token> { Token.ShortLeft, Token.ShortLeft, Token.ShortLeft, Token.ShortLeft },
+
+            // Line Atoms
             [AtomType.MediumLine] = new List<Token> { Token.ShortRight, Token.ShortRight, Token.ShortRight, Token.ShortRight, Token.MediumLeft },
             [AtomType.LongLine] = new List<Token> { Token.ShortRight, Token.ShortRight, Token.ShortRight, Token.ShortRight, Token.LongLeft },
 
+            // Compare Atoms
             [AtomType.CompareHorizontal] = new List<Token> { Token.ShortRight, Token.ShortLeft, Token.ShortRight, Token.ShortLeft },
-            [AtomType.CompareVertical] = new List<Token> { Token.ShortUp, Token.ShortDown, Token.ShortUp, Token.ShortDown }
+            [AtomType.CompareVertical] = new List<Token> { Token.ShortUp, Token.ShortDown, Token.ShortUp, Token.ShortDown },
+            [AtomType.CompareHorizontalAlt] = new List<Token> { Token.ShortLeft, Token.ShortRight, Token.ShortLeft, Token.ShortRight },
+            [AtomType.CompareVerticalAlt] = new List<Token> { Token.ShortDown, Token.ShortUp, Token.ShortDown, Token.ShortUp},
 
-            // Add other atom definitions here for all atomtypes.
+            // Scanning Atoms
+            [AtomType.ScanHorizontal] = new List<Token> { Token.ShortRight, Token.ShortLeft, Token.ShortLeft, Token.ShortRight },
+            [AtomType.ScanVertical] = new List<Token> { Token.ShortUp, Token.ShortDown, Token.ShortDown, Token.ShortUp },
+            [AtomType.ScanHorizontalAlt] = new List<Token> { Token.ShortLeft, Token.ShortRight, Token.ShortRight, Token.ShortLeft },
+            [AtomType.ScanVerticalAlt] = new List<Token> { Token.ShortDown, Token.ShortUp, Token.ShortUp, Token.ShortDown },
+
+            [AtomType.ScanRightUp] = new List<Token> { Token.ShortRight, Token.ShortLeft, Token.ShortUp, Token.ShortDown },
+            [AtomType.ScanRightUpAlt] = new List<Token> { Token.ShortUp, Token.ShortDown, Token.ShortRight, Token.ShortLeft},
+
+            [AtomType.ScanUpLeft] = new List<Token> { Token.ShortUp, Token.ShortDown, Token.ShortLeft, Token.ShortRight },
+            [AtomType.ScanUpLeftAlt] = new List<Token> { Token.ShortLeft, Token.ShortRight, Token.ShortUp, Token.ShortDown },
+
+            [AtomType.ScanLeftDown] = new List<Token> { Token.ShortLeft, Token.ShortRight, Token.ShortDown, Token.ShortUp },
+            [AtomType.ScanLeftDownAlt] = new List<Token> { Token.ShortDown, Token.ShortUp, Token.ShortLeft, Token.ShortRight },
+
+            [AtomType.ScanDownRight] = new List<Token> { Token.ShortDown, Token.ShortUp, Token.ShortRight, Token.ShortLeft },
+            [AtomType.ScanDownRightAlt] = new List<Token> { Token.ShortRight, Token.ShortLeft, Token.ShortDown, Token.ShortUp }
         };
 
         public delegate Dictionary<DeltaKey, int> TableCreator();
@@ -140,24 +196,76 @@ namespace EyeTrackingCore
         // appropriate weighting table for that atomtype.
         public static Dictionary<AtomType, TableCreator> DeltaDefinitions = new Dictionary<AtomType, TableCreator>
         {
+            // String Atoms
+            [AtomType.StringUp] = CreateStringUpDeltaTable,
+            [AtomType.StringRight] = CreateStringRightDeltaTable,
+            [AtomType.StringDown] = CreateStringDownDeltaTable,
+            [AtomType.StringLeft] = CreateStringLeftDeltaTable,
+
+            // Line Atoms
             [AtomType.MediumLine] = CreateMediumLineDeltaTable,
             [AtomType.LongLine] = CreateLongLineDeltaTable,
 
+            // Compare Atoms
             [AtomType.CompareHorizontal] = CreateCompareHorizontalDeltaTable,
-            [AtomType.CompareVertical] = CreateCompareVerticalDeltaTable
+            [AtomType.CompareVertical] = CreateCompareVerticalDeltaTable,
+            [AtomType.CompareHorizontalAlt] = CreateCompareHorizontalDeltaTable,
+            [AtomType.CompareVerticalAlt] = CreateCompareVerticalDeltaTable,
 
-            // Add other atom definitions here for all atomtypes.
+            // Scanning Atoms
+            [AtomType.ScanHorizontal] = CreateScanHorizontalDeltaTable,
+            [AtomType.ScanVertical] = CreateScanVerticalDeltaTable,
+            [AtomType.ScanHorizontalAlt] = CreateScanHorizontalDeltaTable,
+            [AtomType.ScanVerticalAlt] = CreateScanVerticalDeltaTable,
+
+            [AtomType.ScanRightUp] = CreateScanCornerDeltaTable,
+            [AtomType.ScanRightUpAlt] = CreateScanCornerDeltaTable,
+
+            [AtomType.ScanUpLeft] = CreateScanCornerDeltaTable,
+            [AtomType.ScanUpLeftAlt] = CreateScanCornerDeltaTable,
+
+            [AtomType.ScanLeftDown] = CreateScanCornerDeltaTable,
+            [AtomType.ScanLeftDownAlt] = CreateScanCornerDeltaTable,
+
+            [AtomType.ScanDownRight] = CreateScanCornerDeltaTable,
+            [AtomType.ScanDownRightAlt] = CreateScanCornerDeltaTable
         };
 
         public static Dictionary<AtomType, int> ThresholdDefinitions = new Dictionary<AtomType, int>
         {
+            // String Atoms
+            [AtomType.StringUp] = 7,
+            [AtomType.StringRight] = 7,
+            [AtomType.StringDown] = 7,
+            [AtomType.StringLeft] = 7,
+
+            // Line Atoms
             [AtomType.MediumLine] = 21,
             [AtomType.LongLine] = 21,
 
+            // Compare Atoms
             [AtomType.CompareHorizontal] = 7,
-            [AtomType.CompareVertical] = 7
+            [AtomType.CompareVertical] = 7,
+            [AtomType.CompareHorizontalAlt] = 7,
+            [AtomType.CompareVerticalAlt] = 7,
 
-            // Add other atom definitions here for all atomtypes.
+            // Scanning Atoms
+            [AtomType.ScanHorizontal] = 4,
+            [AtomType.ScanVertical] = 4,
+            [AtomType.ScanHorizontalAlt] = 4,
+            [AtomType.ScanVerticalAlt] = 4,
+
+            [AtomType.ScanRightUp] = 4,
+            [AtomType.ScanRightUpAlt] = 4,
+
+            [AtomType.ScanUpLeft] = 4,
+            [AtomType.ScanUpLeftAlt] = 4,
+
+            [AtomType.ScanLeftDown] = 4,
+            [AtomType.ScanLeftDownAlt] = 4,
+
+            [AtomType.ScanDownRight] = 4,
+            [AtomType.ScanDownRightAlt] = 4
         };
 
         // Tokens we care about for finding atoms.
@@ -197,6 +305,156 @@ namespace EyeTrackingCore
             return deltaTable;
         }
 
+        // String Atoms
+        public static Dictionary<DeltaKey, int> CreateStringUpDeltaTable()
+        {
+            Dictionary<DeltaKey, int> deltaTable = CreateInitialTable(-1);
+
+            // Want to match only ups. Perfect match would score 8.
+            DeltaKey key = new DeltaKey("Su", "Su");
+            deltaTable[key] = 2;
+
+            // Replacing Su with any number of Mu is okay too.
+            key = new DeltaKey("Su", "Mu");
+            deltaTable[key] = 2;
+
+            // Short left rights and downs are okay.
+            key = new DeltaKey("Su", "Sl");
+            deltaTable[key] = 1;
+            
+            key = new DeltaKey("Su", "Sr");
+            deltaTable[key] = 1;
+
+            key = new DeltaKey("Su", "Sd");
+            deltaTable[key] = 1;
+
+            foreach (Token y in tokens)
+            {
+                // Penalise any kind of insertions
+                key = new DeltaKey("", Wordbook.TokenToString(y));
+                deltaTable[key] = -10;
+
+                // Penalise any kind of deletion
+                key = new DeltaKey(Wordbook.TokenToString(y), "");
+                deltaTable[key] = -10;
+            }
+
+            return deltaTable;
+        } // SuSuSuSu
+        public static Dictionary<DeltaKey, int> CreateStringRightDeltaTable()
+        {
+            Dictionary<DeltaKey, int> deltaTable = CreateInitialTable(-1);
+
+            // Want to match only rights. Perfect match would score 8.
+            DeltaKey key = new DeltaKey("Sr", "Sr");
+            deltaTable[key] = 2;
+
+            // Replacing Sr with any number of Mr is okay too.
+            key = new DeltaKey("Sr", "Mr");
+            deltaTable[key] = 2;
+
+            // Replacing a short right in the string with a short left is okay.
+            key = new DeltaKey("Sr", "Sl");
+            deltaTable[key] = 1;
+
+            // Short ups and downs are okay
+            key = new DeltaKey("Sr", "Su");
+            deltaTable[key] = 1;
+
+            key = new DeltaKey("Sr", "Sd");
+            deltaTable[key] = 1;
+
+            // If there is one replacement of an Sr either with Sl Su Sd, and the rest match with Sr, then the matching score would be 7. 6 for two replacements, etc.
+            // We want to allow only one replacement somewhere in the string. So we will want a threshold of 7 when finding matches.
+
+            // todo: need a way to specify the first and last tokens in the atom cannot change
+            //          perhaps something like Sr - - Sr, where Sr matching with Sr score is high and whatever the dummy - char is has an equally high score for being replace with Sr, whilst slightly lower score for being replaced with Su, Sl, Sd.
+
+            foreach (Token y in tokens)
+            {
+                // Penalise any kind of insertions
+                key = new DeltaKey("", Wordbook.TokenToString(y));
+                deltaTable[key] = -10;
+
+                // Penalise any kind of deletion
+                key = new DeltaKey(Wordbook.TokenToString(y), "");
+                deltaTable[key] = -10;
+            }
+
+            return deltaTable;
+        } // SrSrSrSr, see notes for matching information
+        public static Dictionary<DeltaKey, int> CreateStringDownDeltaTable()
+        {
+            Dictionary<DeltaKey, int> deltaTable = CreateInitialTable(-1);
+
+            // Want to match only downs. Perfect match would score 8.
+            DeltaKey key = new DeltaKey("Sd", "Sd");
+            deltaTable[key] = 2;
+
+            // Replacing Sd with any number of Md is okay too.
+            key = new DeltaKey("Sd", "Md");
+            deltaTable[key] = 2;
+
+            // Short left rights and ups are okay.
+            key = new DeltaKey("Sd", "Sl");
+            deltaTable[key] = 1;
+
+            key = new DeltaKey("Sd", "Sr");
+            deltaTable[key] = 1;
+
+            key = new DeltaKey("Sd", "Su");
+            deltaTable[key] = 1;
+
+            foreach (Token y in tokens)
+            {
+                // Penalise any kind of insertions
+                key = new DeltaKey("", Wordbook.TokenToString(y));
+                deltaTable[key] = -10;
+
+                // Penalise any kind of deletion
+                key = new DeltaKey(Wordbook.TokenToString(y), "");
+                deltaTable[key] = -10;
+            }
+
+            return deltaTable;
+        } // SdSdSdSd
+        public static Dictionary<DeltaKey, int> CreateStringLeftDeltaTable()
+        {
+            Dictionary<DeltaKey, int> deltaTable = CreateInitialTable(-1);
+
+            // Want to match only lefts. Perfect match would score 8.
+            DeltaKey key = new DeltaKey("Sl", "Sl");
+            deltaTable[key] = 2;
+
+            // Replacing Sl with any number of Ml is okay too.
+            key = new DeltaKey("Sl", "Ml");
+            deltaTable[key] = 2;
+
+            // Short left rights and ups are okay.
+            key = new DeltaKey("Sl", "Sd");
+            deltaTable[key] = 1;
+
+            key = new DeltaKey("Sl", "Sr");
+            deltaTable[key] = 1;
+
+            key = new DeltaKey("Sl", "Su");
+            deltaTable[key] = 1;
+
+            foreach (Token y in tokens)
+            {
+                // Penalise any kind of insertions
+                key = new DeltaKey("", Wordbook.TokenToString(y));
+                deltaTable[key] = -10;
+
+                // Penalise any kind of deletion
+                key = new DeltaKey(Wordbook.TokenToString(y), "");
+                deltaTable[key] = -10;
+            }
+
+            return deltaTable;
+        } // SlSlSlSl
+
+        // Line Atoms
         public static Dictionary<DeltaKey, int> CreateShortLineDeltaTable()
         {
             Dictionary<DeltaKey, int> deltaTable = CreateInitialTable(-1);
@@ -221,7 +479,6 @@ namespace EyeTrackingCore
 
             return deltaTable;
         } // SrSrSrSl
-
         public static Dictionary<DeltaKey, int> CreateMediumLineDeltaTable()
         {
             Dictionary<DeltaKey, int> deltaTable = CreateInitialTable(-1);
@@ -249,7 +506,6 @@ namespace EyeTrackingCore
 
             return deltaTable;
         } // SrSrSrSrLl
-
         public static Dictionary<DeltaKey, int> CreateLongLineDeltaTable()
         {
             Dictionary<DeltaKey, int> deltaTable = CreateInitialTable(-1);
@@ -278,99 +534,7 @@ namespace EyeTrackingCore
             return deltaTable;
         } // SrSrSrSrLl
 
-        public static Dictionary<DeltaKey, int> CreateHorizontalFocalPointDeltaTable()
-        {
-            Dictionary<DeltaKey, int> deltaTable = CreateInitialTable(-5);
-
-            // Want to match lefts and rights mostly
-            DeltaKey key = new DeltaKey("Sr", "Sr");
-            deltaTable[key] = 10;
-
-            key = new DeltaKey("Sl", "Sl");
-            deltaTable[key] = 10;
-
-            // But we can allow Sl to be Ml and Sr to be Mr
-            key = new DeltaKey("Sr", "Mr");
-            deltaTable[key] = 8;
-
-            key = new DeltaKey("Sl", "Ml");
-            deltaTable[key] = 8;
-
-            foreach (Token y in tokens)
-            {
-                // Penalise any kind of insertions
-                key = new DeltaKey("", Wordbook.TokenToString(y));
-                deltaTable[key] = -10;
-
-                // Allow some deletions
-                key = new DeltaKey(Wordbook.TokenToString(y), "");
-                deltaTable[key] = -10;
-            }
-
-            return deltaTable;
-        } // SrSlSlSr
-
-        public static Dictionary<DeltaKey, int> CreateVerticalFocalPointDeltaTable()
-        {
-            Dictionary<DeltaKey, int> deltaTable = CreateInitialTable(-5);
-
-            // Want to match lefts and rights mostly
-            DeltaKey key = new DeltaKey("Su", "Su");
-            deltaTable[key] = 10;
-
-            key = new DeltaKey("Sd", "Sd");
-            deltaTable[key] = 10;
-
-            // But we can allow Sl to be Ml and Sr to be Mr
-            key = new DeltaKey("Su", "Mu");
-            deltaTable[key] = 8;
-
-            key = new DeltaKey("Sd", "Md");
-            deltaTable[key] = 8;
-
-            foreach (Token y in tokens)
-            {
-                // Penalise any kind of insertions
-                key = new DeltaKey("", Wordbook.TokenToString(y));
-                deltaTable[key] = -10;
-            }
-
-            return deltaTable;
-        } // SuSdSdSu
-
-        public static Dictionary<DeltaKey, int> CreateRightStringDeltaTable()
-        {
-            Dictionary<DeltaKey, int> deltaTable = CreateInitialTable(-1);
-
-            // Want to match lefts and rights mostly
-            DeltaKey key = new DeltaKey("Sr", "Sr");
-            deltaTable[key] = 2;
-
-            // Backwards is free
-            key = new DeltaKey("Sr", "Sl");
-            deltaTable[key] = 1;
-
-            // Short ups and downs are okay
-            key = new DeltaKey("Sr", "Su");
-            deltaTable[key] = 1;
-
-            key = new DeltaKey("Sr", "Sd");
-            deltaTable[key] = 1;
-
-            foreach (Token y in tokens)
-            {
-                // Penalise any kind of insertions
-                key = new DeltaKey("", Wordbook.TokenToString(y));
-                deltaTable[key] = -10;
-
-                // Penalise any kind of deletion
-                key = new DeltaKey(Wordbook.TokenToString(y), "");
-                deltaTable[key] = -10;
-            }
-
-            return deltaTable;
-        } // SrSrSrSr
-
+        // Compare Atoms
         public static Dictionary<DeltaKey, int> CreateCompareHorizontalDeltaTable() // SrSlSrSl
         {
             Dictionary<DeltaKey, int> deltaTable = CreateInitialTable(-2);
@@ -405,7 +569,6 @@ namespace EyeTrackingCore
 
             return deltaTable;
         }
-
         public static Dictionary<DeltaKey, int> CreateCompareVerticalDeltaTable() // SuSdSuSd
         {
             Dictionary<DeltaKey, int> deltaTable = CreateInitialTable(-2);
@@ -441,34 +604,88 @@ namespace EyeTrackingCore
             return deltaTable;
         }
 
-        // scanning
+        // Scanning Atoms
+        public static Dictionary<DeltaKey, int> CreateScanHorizontalDeltaTable()
+        {
+            Dictionary<DeltaKey, int> deltaTable = CreateInitialTable(-1);
 
-        // scanRightUp
-        // scanUpLeft
-        // scanLeftDown
-        // scanDownRight
+            // Want to match lefts and rights mostly
+            // Perfect match = 4
+            DeltaKey key = new DeltaKey("Sr", "Sr");
+            deltaTable[key] = 1;
 
-        // scanHorizontal
-        // scanVertical
+            key = new DeltaKey("Sl", "Sl");
+            deltaTable[key] = 1;
 
-        // box-scan
+            foreach (Token y in tokens)
+            {
+                // Penalise any kind of insertions
+                key = new DeltaKey("", Wordbook.TokenToString(y));
+                deltaTable[key] = -10;
 
-        // comparisons
+                // and deletions
+                key = new DeltaKey(Wordbook.TokenToString(y), "");
+                deltaTable[key] = -10;
+            }
 
-        // horizontal-compare
-        // vertical-compare
+            return deltaTable;
+        } // SrSlSlSr
+        public static Dictionary<DeltaKey, int> CreateScanVerticalDeltaTable()
+        {
+            Dictionary<DeltaKey, int> deltaTable = CreateInitialTable(-1);
 
-        // strings
+            // Want to match lefts and rights mostly
+            DeltaKey key = new DeltaKey("Su", "Su");
+            deltaTable[key] = 1;
 
-        // up-string
-        // right-string
-        // down-string
-        // left-string
+            key = new DeltaKey("Sd", "Sd");
+            deltaTable[key] = 1;
 
-        // lines
+            foreach (Token y in tokens)
+            {
+                // Penalise any kind of insertions
+                key = new DeltaKey("", Wordbook.TokenToString(y));
+                deltaTable[key] = -10;
 
-        // long-line
-        // medium-line
+                // and deletions
+                key = new DeltaKey(Wordbook.TokenToString(y), "");
+                deltaTable[key] = -10;
+            }
+
+            return deltaTable;
+        } // SuSdSdSu
+
+        public static Dictionary<DeltaKey, int> CreateScanCornerDeltaTable()
+        {
+            Dictionary<DeltaKey, int> deltaTable = CreateInitialTable(-5);
+
+            // Want to match lefts and rights, ups and down
+            DeltaKey key = new DeltaKey("Su", "Su");
+            deltaTable[key] = 1;
+
+            key = new DeltaKey("Sd", "Sd");
+            deltaTable[key] = 1;
+
+            key = new DeltaKey("Sl", "Sl");
+            deltaTable[key] = 1;
+
+            key = new DeltaKey("Sr", "Sr");
+            deltaTable[key] = 1;
+
+            foreach (Token y in tokens)
+            {
+                // Penalise any kind of insertions
+                key = new DeltaKey("", Wordbook.TokenToString(y));
+                deltaTable[key] = -10;
+
+                // and deletions
+                key = new DeltaKey(Wordbook.TokenToString(y), "");
+                deltaTable[key] = -10;
+            }
+
+            return deltaTable;
+        } // SrSlSuSd, and all variants
+        
     }
 
     class Matching

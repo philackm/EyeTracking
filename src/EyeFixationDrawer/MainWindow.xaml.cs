@@ -933,18 +933,17 @@ namespace EyeFixationDrawer
             Wordbook saccadeBook = new Wordbook(calculatedSaccades);
             AtomBook atomBook = new AtomBook(saccadeBook);
 
-            MessageBox.Show(atomBook.atoms[AtomType.CompareHorizontal].Count.ToString());
-            MessageBox.Show(atomBook.atoms[AtomType.CompareVertical].Count.ToString());
+            MessageBox.Show(atomBook.NumberOfScans.ToString());
         }
         
         private void drawNextFocalPointButton_Click(object sender, RoutedEventArgs e)
         {
-            DrawNextAtom(AtomType.MediumLine);
+            DrawNextAtom(AtomType.ScanHorizontal);
         }
 
         private void drawNextHorizontalCompareButton_Click(object sender, RoutedEventArgs e)
         {
-            DrawNextAtom(AtomType.CompareHorizontal);
+            DrawNextAtom(AtomType.ScanHorizontalAlt);
         }
 
         private void drawNextVertCompare_Click(object sender, RoutedEventArgs e)

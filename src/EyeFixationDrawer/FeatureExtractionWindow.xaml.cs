@@ -144,7 +144,10 @@ namespace EyeFixationDrawer
 
             // Blink related features.
 
-
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of Strings", include = true, action = NumberOfStrings });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of Lines", include = true, action = NumberOfLines });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of Comparisons", include = true, action = NumberOfComparisons });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of Scans", include = true, action = NumberOfScans });
 
             featureList.ItemsSource = items;
         }
@@ -402,7 +405,35 @@ namespace EyeFixationDrawer
             return saccades.Where(saccade => saccade.Sector4 == Sector.Down).ToList().Count;
         }
 
-        
+        // wordbook features
+        // #################
 
+        private double NumberOfStrings(List<Saccade> saccades)
+        {
+            Wordbook saccadeBook = new Wordbook(saccades);
+            AtomBook atomBook = new AtomBook(saccadeBook);
+            return atomBook.NumberOfStrings;
+        }
+
+        private double NumberOfLines(List<Saccade> saccades)
+        {
+            Wordbook saccadeBook = new Wordbook(saccades);
+            AtomBook atomBook = new AtomBook(saccadeBook);
+            return atomBook.NumberOfLines;
+        }
+
+        private double NumberOfComparisons(List<Saccade> saccades)
+        {
+            Wordbook saccadeBook = new Wordbook(saccades);
+            AtomBook atomBook = new AtomBook(saccadeBook);
+            return atomBook.NumberOfComparisons;
+        }
+
+        private double NumberOfScans(List<Saccade> saccades)
+        {
+            Wordbook saccadeBook = new Wordbook(saccades);
+            AtomBook atomBook = new AtomBook(saccadeBook);
+            return atomBook.NumberOfScans;
+        }
     }
 }
