@@ -110,6 +110,8 @@ namespace EyeFixationDrawer
             items.Add(new FixationFeatureExtractor() { featureName = "DistractionDown", include = true, action = DistractionDown });
             items.Add(new FixationFeatureExtractor() { featureName = "DistractionLeft", include = true, action = DistractionLeft });
 
+            items.Add(new FixationFeatureExtractor() { featureName = "Area Containing Fixations (95%)", include = true, action = AreaContainingFixations });
+
 
 
 
@@ -271,6 +273,151 @@ namespace EyeFixationDrawer
         private double DistractionDown(List<Fixation> fixations)
         {
             return fixations.Aggregate(0, (acc, fixation) => fixation.y > screenHeight + buffer ? acc + 1 : acc);
+        }
+
+        private double AreaContainingFixations(List<Fixation> fixations)
+        {
+            // find centre of all fixations
+            System.Windows.Point centre = CalculateMean(fixations);
+
+            // get lengths from centre to each fixation and sort them
+            var distances = DistancesFromPointToOtherPoints(centre, fixations);
+            distances.Sort((x,y) => x.Item2.CompareTo(y.Item2));
+
+            // drop the fixations that were in the top 5% of
+            int numToDrop = (int)(distances.Count * 0.10);
+            var dropped = distances.GetRange(0, distances.Count - numToDrop);
+
+            // for each remaining fixation,
+            // if the fixations falls within the rectangle do nothing, else
+            // extend the rectangle to encompass the fixations
+            // return the area of the rectangle
+            var areaRect = new AreaRect(fixations[dropped[0].Item1].x, fixations[dropped[0].Item1].y);
+            for (int i = 1; i < dropped.Count; i++)
+            {
+                areaRect.IncreaseRectSizeToContainPoint(fixations[dropped[i].Item1].x, fixations[dropped[i].Item1].y);
+            }
+
+            return areaRect.CalculateArea();
+        }
+        
+        // area helper functions
+        private System.Windows.Point CalculateMean(List<Fixation> fixations)
+        {
+            System.Windows.Point mean = new System.Windows.Point();
+            double count = fixations.Count;
+
+            double xSum = 0;
+            double ySum = 0;
+
+            foreach(Fixation fixation in fixations)
+            {
+                xSum += fixation.x;
+                ySum += fixation.y;
+            }
+
+            mean.X = xSum / count;
+            mean.Y = ySum / count;
+
+            return mean;
+        }
+
+        private List<Tuple<int, double>> DistancesFromPointToOtherPoints(System.Windows.Point centre, List<Fixation> fixations)
+        {
+            List<Tuple<int, double>> indexDistanceList = new List<Tuple<int, double>>();
+
+            for(int i = 0; i < fixations.Count; i++)
+            {
+                Fixation fixation = fixations[i];
+
+                int index = i;
+                double distance = MathNet.Numerics.Distance.Euclidean(new double[] { centre.X, centre.Y }, new double[] { fixation.x, fixation.y });
+
+                Tuple<int, double> distanceForFixationIndex = new Tuple<int, double>(index, distance);
+                indexDistanceList.Add(distanceForFixationIndex);
+            }
+
+            return indexDistanceList;
+        }
+
+        private class AreaRect
+        {
+            System.Windows.Point centre = new System.Windows.Point();
+            double top = 0;
+            double right = 0;
+            double bottom = 0;
+            double left = 0;
+
+            public AreaRect(double centreX, double centreY)
+            {
+                this.centre = new System.Windows.Point(centreX, centreY);
+            }
+
+            public double CalculateArea()
+            {
+                return (left + right) * (top + bottom);
+            }
+            
+            public void IncreaseRectSizeToContainPoint(double x, double y)
+            {
+                Tuple<Double, Double> xRange = GetXRange();
+                Tuple<Double, Double> yRange = GetYRange();
+                
+                if(!InRange(x, xRange))
+                {
+                    // the point is outside the x range.
+                    // have to increase the width of the rect to encompass it
+
+                    // increase the rect to the left
+                    if (x < centre.X)
+                    {
+                        left = centre.X - x;
+                    }
+
+                    //increase the rect to the right
+                    if (x > centre.X)
+                    {
+                        right = x - centre.X;
+                    }
+                }
+
+                if (!InRange(y, yRange))
+                {
+                    // the point is outside the y range.
+                    // have to increase the height of the rect to encompass it
+
+                    // increase the rect to the top
+                    if (y < centre.Y)
+                    {
+                        top = centre.Y - y;
+                    }
+
+                    // increase the rect towards the bottom
+                    if (y > centre.Y)
+                    {
+                        bottom = y - centre.Y;
+                    }
+                }
+            }
+
+            private bool InRange(double value, Tuple<Double, Double> range)
+            {
+                return value >= range.Item1 && value <= range.Item2;
+            }
+
+            private Tuple<Double, Double> GetXRange()
+            {
+                double from = centre.X - left;
+                double to = centre.X + right;
+                return new Tuple<double, double>(from, to);
+            }
+
+            private Tuple<Double, Double> GetYRange()
+            {
+                double from = centre.Y - top;
+                double to = centre.Y + bottom;
+                return new Tuple<double, double>(from, to);
+            }
         }
 
         // Software Eng Fixation Counts
