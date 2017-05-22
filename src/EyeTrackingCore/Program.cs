@@ -82,7 +82,7 @@ namespace ConsoleApplication
             List<GazePoint> gazePoints = serialiser.Deserialize(stream) as List<GazePoint>;
 
             RawToFixationConverter converter = new RawToFixationConverter(gazePoints);
-            List<Fixation> fixations = converter.CalculateFixations(4, 5, 25);
+            List<Fixation> fixations = converter.CalculateFixations(4, 5, 25, 0);
         }
 
         private static void TestGeometricMedian()

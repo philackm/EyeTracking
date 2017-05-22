@@ -186,7 +186,7 @@ namespace EyeFixationDrawer
         {
             RawToFixationConverter converter = new RawToFixationConverter(gazePoints);
 
-            List<Fixation> fixations = converter.CalculateFixations(currentWindowSize, (float)peakThreshold, (float)radius);
+            List<Fixation> fixations = converter.CalculateFixations(currentWindowSize, (float)peakThreshold, (float)radius, 0); // don't clip any gazepoints when simply drawing
             List<Saccade> saccades = converter.GenerateSaccades(fixations);
 
             calculatedSaccades = saccades;

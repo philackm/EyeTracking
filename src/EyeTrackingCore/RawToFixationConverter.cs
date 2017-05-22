@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace EyeTrackingCore {
 
@@ -15,12 +16,70 @@ namespace EyeTrackingCore {
             this.rawPoints = null;
         }
 
+        // Removes any raw points that were in the first amountToClip milliseconds and the last amountToClip milliseconds
+        public void ClipRawPoints(int amountToClip)
+        {
+            // Starting at the start, drop any points that have timestamp <= amountToClip
+            // stop when there are not more <= amountToClip
+
+            if (rawPoints == null || rawPoints.Count == 0)
+            {
+                Console.WriteLine("RawPoints is null or contains no points. Unable clip points");
+                return;
+            }
+
+            rawPoints.RemoveAt(0); // There is a bug that caused the first gaze point in all the data we collected to have a very high starting time, causing this not to clip the points correctly.
+
+            int numberToDrop = 0; //keep track of where we have to drop
+
+            for(int i = 0; i < rawPoints.Count; i++)
+            {
+                if(rawPoints[i].timestamp <= amountToClip)
+                {
+                    numberToDrop = i + 1;
+                }
+                else
+                {
+                    break; // stop the for loop
+                }
+            }
+
+            rawPoints.RemoveRange(0, numberToDrop);
+
+            // Starting at the end, drop any points that have timestamp >= finalTimestamp - amountToClip
+            // stop when there are no more >= finalTimestamp - amountToClip
+
+            if(rawPoints.Count > 0)
+            {
+                int finalTimestamp = rawPoints.Last().timestamp;
+                int startingIndex = 0;
+                numberToDrop = 0;
+
+                for (int i = rawPoints.Count - 1; i >= 0; i--)
+                {
+                    if (rawPoints[i].timestamp >= finalTimestamp - amountToClip)
+                    {
+                        startingIndex = i;
+                        numberToDrop++;
+                    }
+                    else
+                    {
+                        break; // stop the for loop
+                    }
+                }
+
+                rawPoints.RemoveRange(startingIndex, numberToDrop);
+            }   
+        }
+
         // Converts raw gaze input into fixations.
-        public List<Fixation> CalculateFixations(int windowSize, float peakThreshold, float radius) {
-            
-            if(rawPoints == null) {
-                Console.WriteLine("RawPoints is null. Unable to calculate fixations.");
-                return null;
+        public List<Fixation> CalculateFixations(int windowSize, float peakThreshold, float radius, int clipAmount) {
+
+            ClipRawPoints(clipAmount);
+
+            if(rawPoints == null || rawPoints.Count == 0) {
+                Console.WriteLine("RawPoints is null or contains no points. Unable to calculate fixations.");
+                return new List<Fixation>();
             }
 
             Console.WriteLine("Calculating fixations...");

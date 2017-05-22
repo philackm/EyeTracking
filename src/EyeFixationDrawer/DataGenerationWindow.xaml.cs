@@ -122,26 +122,27 @@ namespace EyeFixationDrawer
                     bool includeNames = true;
 
                     // Add the slice time to the end of the filename. (We generate as many files as the needed with <saveFileName>_sliceTime.csv as the filename)
-                    string updatedFileName = saveFileName.Insert(saveFileName.Length - 4, String.Format("_{0}s", sliceTime));
+                    string trainFileName = saveFileName.Insert(saveFileName.Length - 4, String.Format("_train_{0}s", sliceTime));
                     Console.WriteLine(sliceTime);
-                    Console.WriteLine(updatedFileName);
+                    Console.WriteLine(trainFileName);
 
-                    // Setup the file stream writer.
-                    System.IO.FileStream fileStream = new System.IO.FileStream(updatedFileName, System.IO.FileMode.Append);
-                    StreamWriter writer = new StreamWriter(fileStream);
-                    
+                    string testFileName = saveFileName.Insert(saveFileName.Length - 4, String.Format("_test_{0}s", sliceTime));
+                    Console.WriteLine(sliceTime);
+                    Console.WriteLine(testFileName);
+
+                    // Setup the file stream writers.
+                    System.IO.FileStream trainFileStream = new System.IO.FileStream(trainFileName, System.IO.FileMode.Append);
+                    StreamWriter trainFileWriter = new StreamWriter(trainFileStream);
+
+                    // Setup the file stream writers.
+                    System.IO.FileStream testFileStream = new System.IO.FileStream(testFileName, System.IO.FileMode.Append);
+                    StreamWriter testfileWriter = new StreamWriter(testFileStream);
 
                     // Write the column names to the top 
                     if (includeNames)
                     {
-                        for (int i = 0; i < extractors.Count - 1; i++)
-                        {
-                            writer.Write(extractors[i].featureName + ", ");
-                        }
-                        writer.Write(extractors[extractors.Count - 1].featureName);
-
-                        writer.Write("\n");
-                        writer.Flush();
+                        WriteColumnNames(trainFileWriter, extractors);
+                        WriteColumnNames(testfileWriter, extractors);
                     }
 
                     // We have the fileName to save the instances to, generate all the instances and then save them to the file at this location.
@@ -156,40 +157,26 @@ namespace EyeFixationDrawer
                         readFileStream.Close();
 
                         RawToFixationConverter converter = new RawToFixationConverter(gazePoints);
-                        List<Fixation> fixations = converter.CalculateFixations((int)windowSize, (float)peakThreshold, (float)radius);
+                        List<Fixation> fixations = converter.CalculateFixations((int)windowSize, (float)peakThreshold, (float)radius, 15000); // Clip 15 seconds of data on either side when generating the data.
 
-                        // Now we can slice the fixations for this data file, write it to the csv and append the class for this data file to the end.
+                        int seed = 0;
+                        double testPercentage = 0.3;
+                        
                         List<Slice> slices = SliceFixations(fixations, sliceTime * 1000); // convert sliceTime to milliseconds
+                        Tuple<List<Slice>, List<Slice>> trainTest = SplitSlicesIntoTrainAndTest(slices, seed, testPercentage);
 
-                        foreach (Slice slice in slices)
-                        {
-                            foreach (var extractor in extractors)
-                            {
-                                switch (extractor.DataType())
-                                {
-                                    case FeatureExtractionWindow.RequiredData.Fixation:
-                                        var fixationExtractor = extractor as FeatureExtractionWindow.FixationFeatureExtractor;
-                                        writer.Write(fixationExtractor.action(slice.fixations) + ", ");
-                                        break;
-                                    case FeatureExtractionWindow.RequiredData.Saccade:
-                                        var saccadeExtractor = extractor as FeatureExtractionWindow.SaccadeFeatureExtractor;
-                                        writer.Write(saccadeExtractor.action(slice.saccades) + ", ");
-                                        break;
-                                }
+                        List<Slice> trainSlices = trainTest.Item1;
+                        List<Slice> testSlices = trainTest.Item2;
 
-                            }
-
-                            writer.Write(dataFile.className);
-                            writer.Write("\n");
-                            writer.Flush();
-                        }
+                        WriteInstacesForSlicesToFile(trainSlices, sliceTime, trainFileWriter, dataFile.className);
+                        WriteInstacesForSlicesToFile(testSlices, sliceTime, testfileWriter, dataFile.className);
                     }
 
-                    writer.Close();
+                    trainFileWriter.Close();
+                    testfileWriter.Close();
                 }
             }
         }
-
 
         private int[] GetSliceLengths()
         {
@@ -202,6 +189,68 @@ namespace EyeFixationDrawer
 
             // Only return an array of the keys of the ones that are actually checked.
             return sliceLengths.Where(kvp => kvp.Value).ToDictionary(i => i.Key, i => i.Value).Keys.ToArray();
+        }
+
+        // if testPercentage == 0.3, for example, then 30% of the data will be kept out for testing.
+        private Tuple<List<Slice>, List<Slice>> SplitSlicesIntoTrainAndTest(List<Slice> slices, int seed, double testPercentage)
+        {
+            Random random = new Random(seed);
+            List<Slice> trainingFixations = new List<Slice>();
+            List<Slice> testFixations = new List<Slice>();
+
+            foreach(Slice slice in slices)
+            {
+                if(random.NextDouble() <= testPercentage)
+                {
+                    testFixations.Add(slice);
+                }
+                else
+                {
+                    trainingFixations.Add(slice);
+                }
+            }
+
+            // Item1 =+ trainingFixations, Item2 == testFixations
+            return new Tuple<List<Slice>, List<Slice>>(trainingFixations, testFixations);
+        }
+
+        public void WriteColumnNames(StreamWriter writer, List<FeatureExtractionWindow.FeatureExtractor> extractors)
+        {
+            for (int i = 0; i < extractors.Count - 1; i++)
+            {
+                writer.Write(extractors[i].featureName + ", ");
+            }
+            writer.Write(extractors[extractors.Count - 1].featureName);
+
+            writer.Write("\n");
+            writer.Flush();
+        }
+
+        public void WriteInstacesForSlicesToFile(List<Slice> slices, int sliceTime, StreamWriter writer, string className)
+        {
+
+            foreach (Slice slice in slices)
+            {
+                foreach (var extractor in extractors)
+                {
+                    switch (extractor.DataType())
+                    {
+                        case FeatureExtractionWindow.RequiredData.Fixation:
+                            var fixationExtractor = extractor as FeatureExtractionWindow.FixationFeatureExtractor;
+                            writer.Write(fixationExtractor.action(slice.fixations) + ", ");
+                            break;
+                        case FeatureExtractionWindow.RequiredData.Saccade:
+                            var saccadeExtractor = extractor as FeatureExtractionWindow.SaccadeFeatureExtractor;
+                            writer.Write(saccadeExtractor.action(slice.saccades) + ", ");
+                            break;
+                    }
+
+                }
+
+                writer.Write(className);
+                writer.Write("\n");
+                writer.Flush();
+            }
         }
 
         // Need to return an array of List<Fixation>, and then calculate all features for each
@@ -368,7 +417,7 @@ namespace EyeFixationDrawer
         }
         */
 
-        struct Slice
+        public struct Slice
         {
             public List<Fixation> fixations;
             public List<Saccade> saccades;
