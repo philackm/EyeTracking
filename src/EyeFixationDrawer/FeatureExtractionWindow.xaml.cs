@@ -103,7 +103,12 @@ namespace EyeFixationDrawer
             items.Add(new FixationFeatureExtractor() { featureName = "Number of VSExplorer Fixations", include = true, action = NumberOfSolutionExplorerFixations });
             items.Add(new FixationFeatureExtractor() { featureName = "Number of VSOutput Fixations", include = true, action = NumberOfOutputFixations });
 
-            items.Add(new FixationFeatureExtractor() { featureName = "BriefToHoldRatio", include = true, action = BriefToHoldRatio });
+            items.Add(new FixationFeatureExtractor() { featureName = "NumberOfBriefFixations", include = true, action = NumberOfBriefFixations });
+            items.Add(new FixationFeatureExtractor() { featureName = "NumberOfHoldFixations", include = true, action = NumberOfHoldFixations });
+
+
+            // Can't use the ratio as the denominator can be zero and therefore the ratio would be undefined.
+            // items.Add(new FixationFeatureExtractor() { featureName = "BriefToHoldRatio", include = true, action = BriefToHoldRatio });
 
             items.Add(new FixationFeatureExtractor() { featureName = "DistractionUp", include = true, action = DistractionUp });
             items.Add(new FixationFeatureExtractor() { featureName = "DistractionRight", include = true, action = DistractionRight });
@@ -111,9 +116,6 @@ namespace EyeFixationDrawer
             items.Add(new FixationFeatureExtractor() { featureName = "DistractionLeft", include = true, action = DistractionLeft });
 
             items.Add(new FixationFeatureExtractor() { featureName = "Area Containing Fixations (90%)", include = true, action = AreaContainingFixations });
-
-
-
 
             // Saccade related features.
             items.Add(new SaccadeFeatureExtractor() { featureName = "Number of Short Saccades", include = true, action = NumberOfShortSaccades });
@@ -146,6 +148,7 @@ namespace EyeFixationDrawer
 
             // Blink related features.
 
+            // Atoms
             items.Add(new SaccadeFeatureExtractor() { featureName = "Number of Strings", include = true, action = NumberOfStrings });
             items.Add(new SaccadeFeatureExtractor() { featureName = "Number of Lines", include = true, action = NumberOfLines });
             items.Add(new SaccadeFeatureExtractor() { featureName = "Number of Comparisons", include = true, action = NumberOfComparisons });
@@ -238,6 +241,24 @@ namespace EyeFixationDrawer
             {
                 return 0;
             }
+        }
+
+        private double NumberOfBriefFixations(List<Fixation> fixations)
+        {
+            Wordbook fixationBook = new Wordbook(fixations);
+
+            double numberOfBriefs = fixationBook.fixationTokens.Aggregate(0, (acc, next) => next == EyeTrackingCore.Token.Brief ? acc + 1 : acc);
+
+            return numberOfBriefs;
+        }
+
+        private double NumberOfHoldFixations(List<Fixation> fixations)
+        {
+            Wordbook fixationBook = new Wordbook(fixations);
+
+            double numberOfHolds = fixationBook.fixationTokens.Aggregate(0, (acc, next) => next == EyeTrackingCore.Token.Hold ? acc + 1 : acc);
+
+            return (numberOfHolds);
         }
 
         private double BriefToHoldRatio(List<Fixation> fixations)
