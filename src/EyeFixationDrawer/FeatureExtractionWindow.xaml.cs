@@ -171,6 +171,10 @@ namespace EyeFixationDrawer
             items.Add(new SaccadeFeatureExtractor() { featureName = "Number of Comparisons", include = true, action = NumberOfComparisons });
             items.Add(new SaccadeFeatureExtractor() { featureName = "Number of Scans", include = true, action = NumberOfScans });
 
+            // Distance based atoms.
+            items.Add(new FixationFeatureExtractor() { featureName = "Number of Returns", include = true, action = NumberOfReturns });
+            items.Add(new FixationFeatureExtractor() { featureName = "Number of Elsewheres", include = true, action = NumberOfElsewheres });
+
             featureList.ItemsSource = items;
         }
 
@@ -711,6 +715,68 @@ namespace EyeFixationDrawer
             Wordbook saccadeBook = new Wordbook(saccades);
             AtomBook atomBook = new AtomBook(saccadeBook);
             return atomBook.NumberOfScans;
+        }
+        
+        // distance based atoms
+        // ####################
+
+        private double NumberOfReturns(List<Fixation> fixations)
+        {
+
+            double returnCount = 0;
+            int returnWindowSize = 3;
+            double atomDistanceRadius = 300;
+
+            for (int i = 0; i < fixations.Count - (returnWindowSize + 1); i++)
+            {
+                if (distance(fixations[i], fixations[i + 1]) > atomDistanceRadius) {
+                    // We know the next fixation has moved out of the radius.
+
+                    if(distance(fixations[i], fixations[i + 2]) <= atomDistanceRadius || distance(fixations[i], fixations[i + 3]) <= atomDistanceRadius)
+                    {
+                        // We have come back to the original spot.
+                        returnCount++;
+                    }
+                }
+            }
+
+            return returnCount;
+        }
+
+        private double NumberOfElsewheres(List<Fixation> fixations)
+        {
+
+            double elsewhereCount = 0;
+            int elsewhereWindowSize = 2;
+            double atomDistanceRadius = 300;
+
+            for (int i = 0; i < fixations.Count - (elsewhereWindowSize + 1); i++)
+            {
+                if (distance(fixations[i], fixations[i + 1]) > atomDistanceRadius)
+                {
+                    // We know the next fixation has moved out of the radius.
+
+                    if (distance(fixations[i+1], fixations[i + 2]) >= atomDistanceRadius || distance(fixations[i], fixations[i + 2]) >= atomDistanceRadius)
+                    {
+                        // We have come back to the original spot.
+                        elsewhereCount++;
+                    }
+                }
+            }
+
+            return elsewhereCount;
+        }
+
+        private double distance(Fixation f1, Fixation f2)
+        {
+            double result = 0;
+
+            double deltaXSquared = (f2.x - f1.x) * (f2.x - f1.x);
+            double deltaYSquared = (f2.y - f1.y) * (f2.y - f1.y);
+
+            result = Math.Sqrt(deltaXSquared + deltaYSquared);
+
+            return result;
         }
     }
 }
