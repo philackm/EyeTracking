@@ -115,7 +115,9 @@ namespace EyeFixationDrawer
             items.Add(new FixationFeatureExtractor() { featureName = "DistractionDown", include = true, action = DistractionDown });
             items.Add(new FixationFeatureExtractor() { featureName = "DistractionLeft", include = true, action = DistractionLeft });
 
-            items.Add(new FixationFeatureExtractor() { featureName = "Area Containing Fixations (90%)", include = true, action = AreaContainingFixations });
+            items.Add(new FixationFeatureExtractor() { featureName = "Area Containing Fixations (75%)", include = true, action = AreaContainingFixations75 });
+            items.Add(new FixationFeatureExtractor() { featureName = "Area Containing Fixations (50%)", include = true, action = AreaContainingFixations50 });
+            items.Add(new FixationFeatureExtractor() { featureName = "Area Containing Fixations (25%)", include = true, action = AreaContainingFixations25 });
 
             // Saccade related features.
             items.Add(new SaccadeFeatureExtractor() { featureName = "Saccade Size (mean)", include = true, action = SaccadeSizeMean });
@@ -310,7 +312,7 @@ namespace EyeFixationDrawer
             return fixations.Aggregate(0, (acc, fixation) => fixation.y > screenHeight + buffer ? acc + 1 : acc);
         }
 
-        private double AreaContainingFixations(List<Fixation> fixations)
+        private double AreaContainingFixations(List<Fixation> fixations, double percentToDrop)
         {
             // find centre of all fixations
             System.Windows.Point centre = CalculateMean(fixations);
@@ -320,7 +322,7 @@ namespace EyeFixationDrawer
             distances.Sort((x,y) => x.Item2.CompareTo(y.Item2));
 
             // drop the fixations that were in the top 10% of
-            int numToDrop = (int)(distances.Count * 0.10);
+            int numToDrop = (int)(distances.Count * percentToDrop);
             var dropped = distances.GetRange(0, distances.Count - numToDrop);
 
             // for each remaining fixation,
@@ -335,7 +337,22 @@ namespace EyeFixationDrawer
 
             return areaRect.CalculateArea();
         }
-        
+
+        private double AreaContainingFixations75(List<Fixation> fixations)
+        {
+            return AreaContainingFixations(fixations, 0.25);
+        }
+
+        private double AreaContainingFixations50(List<Fixation> fixations)
+        {
+            return AreaContainingFixations(fixations, 0.5);
+        }
+
+        private double AreaContainingFixations25(List<Fixation> fixations)
+        {
+            return AreaContainingFixations(fixations, 0.75);
+        }
+
         // area helper functions
         private System.Windows.Point CalculateMean(List<Fixation> fixations)
         {
