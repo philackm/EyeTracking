@@ -152,8 +152,6 @@ namespace EyeFixationDrawer
             items.Add(new SaccadeFeatureExtractor() { featureName = "Sector8 DownLeft", include = true, action = Sector8DownLeftCount });
             items.Add(new SaccadeFeatureExtractor() { featureName = "Sector8 DownRight", include = true, action = Sector8DownRightCount });
 
-
-
             // Wordbook / Pattern related features.
 
             // "Saccade direction" based features.

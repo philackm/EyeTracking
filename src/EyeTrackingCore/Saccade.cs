@@ -47,7 +47,7 @@ namespace EyeTrackingCore
         private double thresholdAngle = 1.1; // degrees
         private double pixelsPerCm = 96 / 2.54; //average is 96 pixels per inch, and there are 2.54cm per inch
 
-        public static Dictionary<Sector, Dictionary<String, Sector[]>> sectorRelations = Saccade.SetupRelations();
+        public static Dictionary<SectorEight, Dictionary<String, SectorEight[]>> sectorRelations = Saccade.SetupRelations();
 
         public Saccade(Point from, Point to)
         {
@@ -323,7 +323,7 @@ namespace EyeTrackingCore
 
         private static bool IsRelatedBy(String relation, Saccade second, Saccade first)
         {
-            return Saccade.sectorRelations[second.Sector4][relation].ToList().Contains(first.Sector4);
+            return Saccade.sectorRelations[second.Sector8][relation].ToList().Contains(first.Sector8);
         }
 
         // Ask: Is the following saccade opposite to the one preceding it, following it (in the same sector), or is it a neighbour (in a neighbouring sector)
@@ -342,47 +342,81 @@ namespace EyeTrackingCore
             return IsRelatedBy("neighbour", second, first);
         }
 
-        private static Dictionary<Sector, Dictionary<String, Sector[]>> SetupRelations()
+        private static Dictionary<SectorEight, Dictionary<String, SectorEight[]>> SetupRelations()
         {
             // up -> down, left, right
             // down -> up, left, right
             // left -> right, up, down
             // right -> left, up, down
 
-            Dictionary<Sector, Dictionary<String, Sector[]>> relations = new Dictionary<Sector, Dictionary<string, Sector[]>>();
+            Dictionary<SectorEight, Dictionary<String, SectorEight[]>> relations = new Dictionary<SectorEight, Dictionary<string, SectorEight[]>>();
 
-            var relationsToRight = new Dictionary<String, Sector[]>
+            var relationsToRight = new Dictionary<String, SectorEight[]>
             {
-                { "opposite", new Sector[] { Sector.Left } },
-                { "follow", new Sector[] { Sector.Right } },
-                { "neighbour", new Sector[] { Sector.Up, Sector.Down } }
+                { "opposite", new SectorEight[] { SectorEight.Left } },
+                { "follow", new SectorEight[] { SectorEight.Right } },
+                { "neighbour", new SectorEight[] { SectorEight.UpRight, SectorEight.DownRight } }
             };
 
-            var relationsToUp = new Dictionary<String, Sector[]>
+            var relationsToUp = new Dictionary<String, SectorEight[]>
             {
-                { "opposite", new Sector[] { Sector.Down } },
-                { "follow", new Sector[] { Sector.Up } },
-                { "neighbour", new Sector[] { Sector.Left, Sector.Right } }
+                { "opposite", new SectorEight[] { SectorEight.Down } },
+                { "follow", new SectorEight[] { SectorEight.Up } },
+                { "neighbour", new SectorEight[] { SectorEight.UpLeft, SectorEight.UpRight } }
             };
 
-            var relationsToLeft = new Dictionary<String, Sector[]>
+            var relationsToLeft = new Dictionary<String, SectorEight[]>
             {
-                { "opposite", new Sector[] { Sector.Right } },
-                { "follow", new Sector[] { Sector.Left } },
-                { "neighbour", new Sector[] { Sector.Up, Sector.Down } }
+                { "opposite", new SectorEight[] { SectorEight.Right } },
+                { "follow", new SectorEight[] { SectorEight.Left } },
+                { "neighbour", new SectorEight[] { SectorEight.UpLeft, SectorEight.DownLeft } }
             };
 
-            var relationsToDown = new Dictionary<String, Sector[]>
+            var relationsToDown = new Dictionary<String, SectorEight[]>
             {
-                { "opposite", new Sector[] { Sector.Up } },
-                { "follow", new Sector[] { Sector.Down } },
-                { "neighbour", new Sector[] { Sector.Left, Sector.Right } }
+                { "opposite", new SectorEight[] { SectorEight.Up } },
+                { "follow", new SectorEight[] { SectorEight.Down } },
+                { "neighbour", new SectorEight[] { SectorEight.DownLeft, SectorEight.DownRight } }
             };
 
-            relations.Add(Sector.Right, relationsToRight);
-            relations.Add(Sector.Up, relationsToUp);
-            relations.Add(Sector.Left, relationsToLeft);
-            relations.Add(Sector.Down, relationsToDown);
+
+            var relationsToUpRight = new Dictionary<String, SectorEight[]>
+            {
+                { "opposite", new SectorEight[] { SectorEight.DownLeft } },
+                { "follow", new SectorEight[] { SectorEight.UpRight } },
+                { "neighbour", new SectorEight[] { SectorEight.Up, SectorEight.Right } }
+            };
+
+            var relationsToUpLeft = new Dictionary<String, SectorEight[]>
+            {
+                { "opposite", new SectorEight[] { SectorEight.DownRight } },
+                { "follow", new SectorEight[] { SectorEight.UpLeft } },
+                { "neighbour", new SectorEight[] { SectorEight.Up, SectorEight.Left } }
+            };
+
+            var relationsToDownLeft = new Dictionary<String, SectorEight[]>
+            {
+                { "opposite", new SectorEight[] { SectorEight.UpRight } },
+                { "follow", new SectorEight[] { SectorEight.DownLeft } },
+                { "neighbour", new SectorEight[] { SectorEight.Left, SectorEight.Down } }
+            };
+
+            var relationsToDownRight = new Dictionary<String, SectorEight[]>
+            {
+                { "opposite", new SectorEight[] { SectorEight.UpLeft } },
+                { "follow", new SectorEight[] { SectorEight.DownRight } },
+                { "neighbour", new SectorEight[] { SectorEight.Down, SectorEight.Right } }
+            };
+
+            relations.Add(SectorEight.Right, relationsToRight);
+            relations.Add(SectorEight.Up, relationsToUp);
+            relations.Add(SectorEight.Left, relationsToLeft);
+            relations.Add(SectorEight.Down, relationsToDown);
+
+            relations.Add(SectorEight.UpRight, relationsToUpRight);
+            relations.Add(SectorEight.UpLeft, relationsToUpLeft);
+            relations.Add(SectorEight.DownLeft, relationsToDownLeft);
+            relations.Add(SectorEight.DownRight, relationsToDownRight);
 
             return relations;
         }
