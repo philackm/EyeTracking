@@ -925,6 +925,44 @@ namespace EyeFixationDrawer
         }
 
 
+        // Fixing CSV files
+        private void AddActivityColumnNameToFiles()
+        {
+            // Create OpenFileDialog 
+            Microsoft.Win32.OpenFileDialog openFileDialog = new Microsoft.Win32.OpenFileDialog();
+            openFileDialog.Multiselect = true;
+
+            // Set filter for file extension and default file extension 
+            openFileDialog.DefaultExt = ".csv";
+            openFileDialog.Filter = "CSV Files (*.csv)|*.csv";
+
+            // Display OpenFileDialog by calling ShowDialog method 
+            Nullable<bool> result = openFileDialog.ShowDialog();
+
+            // Get the selected file name and display in a TextBox 
+            if (result == true)
+            {
+                // Open document 
+                string[] filenames = openFileDialog.FileNames;
+
+                foreach (string filename in filenames)
+                {
+                    appendTextToLine(", Activity", filename, 1);
+                }
+            }
+        }
+
+        private void appendTextToLine(string appended, string fileName, int lineToEdit)
+        {
+            string[] arrLine = File.ReadAllLines(fileName);
+            arrLine[lineToEdit - 1] = String.Format("{0}{1}", arrLine[lineToEdit - 1], appended);
+            File.WriteAllLines(fileName, arrLine);
+        }
+
+        private void AddActivity_Click(object sender, RoutedEventArgs e)
+        {
+            AddActivityColumnNameToFiles();
+        }
 
         // Finding and showing ATOMS
 
@@ -976,5 +1014,7 @@ namespace EyeFixationDrawer
         {
             current = 0;
         }
+
+
     }
 }

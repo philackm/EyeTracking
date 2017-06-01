@@ -88,7 +88,8 @@ namespace EyeFixationDrawer
                 {
                     try
                     {
-                        Data one = new Data(filename, "CLASS");
+                        string className = filename.Split('_')[1].Split('.')[0].ToUpper();
+                        Data one = new Data(filename, className);
                         datum.Add(one);
                     }
                     catch (Exception exception)
@@ -162,7 +163,7 @@ namespace EyeFixationDrawer
                         int seed = 0;
                         double testPercentage = 0.3;
                         
-                        List<Slice> slices = SliceFixations(fixations, sliceTime * 1000); // convert sliceTime to milliseconds
+                        List<Slice> slices = SliceFixations(fixations, sliceTime * 1000, 1000); // convert sliceTime to milliseconds, set a window step size of 1000, therefore minimum window size is 1000.
                         Tuple<List<Slice>, List<Slice>> trainTest = SplitSlicesIntoTrainAndTest(slices, seed, testPercentage);
 
                         List<Slice> trainSlices = trainTest.Item1;
@@ -221,6 +222,7 @@ namespace EyeFixationDrawer
                 writer.Write(extractors[i].featureName + ", ");
             }
             writer.Write(extractors[extractors.Count - 1].featureName);
+            writer.Write(", Activity");
 
             writer.Write("\n");
             writer.Flush();
@@ -290,17 +292,17 @@ namespace EyeFixationDrawer
         */
 
         // number of slices = total time for fixations in ms / (timePeriod / 2)
-        private List<Slice> SliceFixations(List<Fixation> allFixations, double timePeriod)
+        private List<Slice> SliceFixations(List<Fixation> allFixations, double timePeriod, double step)
         {
             List<Slice> slices = new List<Slice>();
             RawToFixationConverter converter = new RawToFixationConverter();
 
-            double halfTimePeriod = timePeriod / 2;
+            double windowStep = step; // This is window step size.
 
             // increment some counter by halfTimePeriod until it is < length of all fixations - a single time period
 
             Fixation finalFixation = allFixations.Last();
-            for (double start = 0; start < finalFixation.endTime - timePeriod; start += halfTimePeriod)
+            for (double start = 0; start < finalFixation.endTime - timePeriod; start += windowStep)
             {
                 double windowStart = start;
                 double windowEnd = start + timePeriod;
@@ -308,8 +310,8 @@ namespace EyeFixationDrawer
                 // Get the fixations within this window
                 List<Fixation> fixationsInWindow = GetFixationsInTimePeriod(windowStart, windowEnd, allFixations);
 
-                // As long as there was at least 1 fixation in that window
-                if (fixationsInWindow.Count > 0)
+                // As long as there was at least 3 fixation in that window
+                if (fixationsInWindow.Count > 3)
                 {
                     // Create a new slice with those fixations.
                     Slice slice = new Slice();
@@ -421,6 +423,34 @@ namespace EyeFixationDrawer
         {
             public List<Fixation> fixations;
             public List<Saccade> saccades;
+        }
+
+        private void showTimeButton_Click(object sender, RoutedEventArgs e)
+        {
+            double totalTime = 0;
+
+            string outputMessage = "";
+
+            // Foreach data file loaded we need to get the gazepoints and then convert them to fixations, then we can slice them.
+            foreach (Data dataFile in dataFileList.Items)
+            {
+                string filename = dataFile.fileName;
+
+                System.IO.FileStream readFileStream = new System.IO.FileStream(filename, System.IO.FileMode.Open);
+                this.gazePoints = this.serialiser.Deserialize(readFileStream) as List<GazePoint>;
+                readFileStream.Close();
+
+                RawToFixationConverter converter = new RawToFixationConverter(gazePoints);
+                List<Fixation> fixations = converter.CalculateFixations((int)windowSize, (float)peakThreshold, (float)radius, 15000); // Clip 15 seconds of data on either side when generating the data.
+
+                double fileTime = fixations[fixations.Count - 1].endTime - fixations[0].startTime;
+                totalTime += fileTime;
+
+                outputMessage += String.Format("{0} was {1} seconds long.\n", filename, fileTime / 1000);
+            }
+
+            outputMessage += String.Format("Total time: {0} minutes.\n", (totalTime / 1000) / 60);
+            MessageBox.Show(outputMessage);
         }
     }
 

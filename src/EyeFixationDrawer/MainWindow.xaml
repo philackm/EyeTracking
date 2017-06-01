@@ -52,5 +52,6 @@
         <Button x:Name="drawNextHorizontalCompareButton" Margin="335,184,0,0" Content="Next Hori Compare" Width="110" VerticalAlignment="Top" HorizontalAlignment="Left" Click="drawNextHorizontalCompareButton_Click" />
         <Button x:Name="drawNextVertCompare" Margin="335,209,0,0" Content="Next Vert Compare" Width="110" VerticalAlignment="Top" HorizontalAlignment="Left" Click="drawNextVertCompare_Click" />
         <Button x:Name="resetButton" Margin="335,234,0,0" Content="Reset" Width="110" VerticalAlignment="Top" HorizontalAlignment="Left" Click="resetButton_Click" />
+        <Button x:Name="AddActivity" Margin="335,259,0,0" Content="Add Activity" Width="110" VerticalAlignment="Top" HorizontalAlignment="Left" Click="AddActivity_Click" />
     </Grid>
 </Window>

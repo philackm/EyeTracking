@@ -118,9 +118,13 @@ namespace EyeFixationDrawer
             items.Add(new FixationFeatureExtractor() { featureName = "Area Containing Fixations (90%)", include = true, action = AreaContainingFixations });
 
             // Saccade related features.
-            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of Short Saccades", include = true, action = NumberOfShortSaccades });
-            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of Medium Saccades", include = true, action = NumberOfMediumSaccades });
-            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of Long Saccades", include = true, action = NumberOfLongSaccades });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Saccade Size (mean)", include = true, action = SaccadeSizeMean });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Saccade Size (variance)", include = true, action = SaccadeSizeVariance });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Saccade Size (standard deviation)", include = true, action = SaccadeSizeStandardDeviation });
+
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of Short Saccades", include = false, action = NumberOfShortSaccades });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of Medium Saccades", include = false, action = NumberOfMediumSaccades });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of Long Saccades", include = false, action = NumberOfLongSaccades });
 
             // Saccade direction counts. (36 features, one for each 10 degree bucket)
             // TODO: figure out how we can write out 36 features whilst passing one function
@@ -132,10 +136,23 @@ namespace EyeFixationDrawer
             items.Add(new SaccadeFeatureExtractor() { featureName = "Opposite Direction Count", include = true, action = OppositeDirectionCount });
 
             // For the 4 sectors, how many of each sector do we have?
-            items.Add(new SaccadeFeatureExtractor() { featureName = "Sector4 Right Count", include = true, action = Sector4RightCount });
-            items.Add(new SaccadeFeatureExtractor() { featureName = "Sector4 Up Count", include = true, action = Sector4UpCount });
-            items.Add(new SaccadeFeatureExtractor() { featureName = "Sector4 Left Count", include = true, action = Sector4LeftCount });
-            items.Add(new SaccadeFeatureExtractor() { featureName = "Sector4 Down Count", include = true, action = Sector4DownCount });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Sector4 Right Count", include = false, action = Sector4RightCount });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Sector4 Up Count", include = false, action = Sector4UpCount });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Sector4 Left Count", include = false, action = Sector4LeftCount });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Sector4 Down Count", include = false, action = Sector4DownCount });
+
+            // For the 8 sectors, how many of each sector do we have?
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Sector8 Right Count", include = true, action = Sector8RightCount });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Sector8 Up Count", include = true, action = Sector8UpCount });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Sector8 Left Count", include = true, action = Sector8LeftCount });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Sector8 Down Count", include = true, action = Sector8DownCount });
+
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Sector8 UpRight Count", include = true, action = Sector8UpRightCount });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Sector8 UpLeft", include = true, action = Sector8UpLeftCount });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Sector8 DownLeft", include = true, action = Sector8DownLeftCount });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Sector8 DownRight", include = true, action = Sector8DownRightCount });
+
+
 
             // Wordbook / Pattern related features.
 
@@ -271,9 +288,8 @@ namespace EyeFixationDrawer
             return (numberOfBriefs / numberOfHolds);
         }
 
-        // TODO: Update with actual screen resolution.
-        double screenWidth = 1680;
-        double screenHeight = 1050;
+        double screenWidth = 1920;
+        double screenHeight = 1080;
         double buffer = 50;
 
         private double DistractionUp(List<Fixation> fixations)
@@ -475,6 +491,42 @@ namespace EyeFixationDrawer
 
         // Saccade related features
         // ########################
+
+        private double SaccadeSizeMean(List<Saccade> saccades)
+        {
+            double sum = 0;
+            int saccadeCount = 1;
+
+            foreach (var saccade in saccades)
+            {
+                saccadeCount++;
+                sum += saccade.Distance;
+            }
+
+            return sum / saccadeCount;
+        }
+
+        private double SaccadeSizeVariance(List<Saccade> saccades)
+        {
+            List<Double> distances = new List<Double>();
+
+            foreach (var saccade in saccades)
+            {
+                var distance = saccade.Distance;
+                distances.Add(distance);
+            }
+
+            return Statistics.Variance(distances);
+        }
+
+        private double SaccadeSizeStandardDeviation(List<Saccade> saccades)
+        {
+            return Math.Sqrt(SaccadeSizeVariance(saccades));
+        }
+
+
+
+
         private double NumberOfShortSaccades(List<Saccade> saccades)
         {
             return CountSaccadesOfType(saccades, SaccadeType.Short);
@@ -552,7 +604,7 @@ namespace EyeFixationDrawer
             return CountRelation(Saccade.Relation.Opposite, saccades);
         }
 
-
+        // Sector4
         private double Sector4RightCount(List<Saccade> saccades)
         {
             return saccades.Where(saccade => saccade.Sector4 == Sector.Right).ToList().Count;
@@ -571,6 +623,48 @@ namespace EyeFixationDrawer
         private double Sector4DownCount(List<Saccade> saccades)
         {
             return saccades.Where(saccade => saccade.Sector4 == Sector.Down).ToList().Count;
+        }
+
+        // Sector8
+
+        private double Sector8RightCount(List<Saccade> saccades)
+        {
+            return saccades.Where(saccade => saccade.Sector8 == SectorEight.Right).ToList().Count;
+        }
+
+        private double Sector8UpCount(List<Saccade> saccades)
+        {
+            return saccades.Where(saccade => saccade.Sector8 == SectorEight.Up).ToList().Count;
+        }
+
+        private double Sector8LeftCount(List<Saccade> saccades)
+        {
+            return saccades.Where(saccade => saccade.Sector8 == SectorEight.Left).ToList().Count;
+        }
+
+        private double Sector8DownCount(List<Saccade> saccades)
+        {
+            return saccades.Where(saccade => saccade.Sector8 == SectorEight.Down).ToList().Count;
+        }
+
+        private double Sector8UpRightCount(List<Saccade> saccades)
+        {
+            return saccades.Where(saccade => saccade.Sector8 == SectorEight.UpRight).ToList().Count;
+        }
+
+        private double Sector8UpLeftCount(List<Saccade> saccades)
+        {
+            return saccades.Where(saccade => saccade.Sector8 == SectorEight.UpLeft).ToList().Count;
+        }
+
+        private double Sector8DownLeftCount(List<Saccade> saccades)
+        {
+            return saccades.Where(saccade => saccade.Sector8 == SectorEight.DownLeft).ToList().Count;
+        }
+
+        private double Sector8DownRightCount(List<Saccade> saccades)
+        {
+            return saccades.Where(saccade => saccade.Sector8 == SectorEight.DownRight).ToList().Count;
         }
 
         // wordbook features

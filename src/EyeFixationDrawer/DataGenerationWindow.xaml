@@ -30,6 +30,7 @@
         <CheckBox x:Name="checkBox30s" Content="30s" HorizontalAlignment="Left" Margin="171,0,0,29" Height="15" VerticalAlignment="Bottom"/>
         <CheckBox x:Name="checkBox60s" Content="60s" HorizontalAlignment="Left" Margin="214,0,0,29" Height="15" VerticalAlignment="Bottom"/>
         <CheckBox x:Name="checkBox90s" Content="90s" HorizontalAlignment="Left" Margin="257,0,0,29" Height="15" VerticalAlignment="Bottom"/>
+        <Button x:Name="showTimeButton" Content="Show Times" Margin="254,0,0,49" Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="121" Click="showTimeButton_Click" />
 
     </Grid>
 </Window>

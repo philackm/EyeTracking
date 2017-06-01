@@ -20,6 +20,18 @@ namespace EyeTrackingCore
         Down
     }
 
+    public enum SectorEight
+    {
+        Right,
+        Up,
+        Left,
+        Down,
+        UpRight,
+        UpLeft,
+        DownLeft,
+        DownRight
+    }
+
     public class Saccade
     {
         private Point from;
@@ -29,6 +41,7 @@ namespace EyeTrackingCore
         private Lazy<double> direction; // in radians
         private Lazy<SaccadeType> type;
         private Lazy<Sector> sector;
+        private Lazy<SectorEight> sector8;
 
         private double distanceFromMonitor = 60; // cm
         private double thresholdAngle = 1.1; // degrees
@@ -45,6 +58,7 @@ namespace EyeTrackingCore
             direction = new Lazy<double>(() => CalculateDirection());
             type = new Lazy<SaccadeType>(() => CalculateSaccadeType(distanceFromMonitor, thresholdAngle, pixelsPerCm));
             sector = new Lazy<Sector>(() => CalculateSectorFromDirection(Direction));
+            sector8 = new Lazy<SectorEight>(() => CalculateSector8FromDirection(Direction));
         }
 
         public double Distance
@@ -78,6 +92,15 @@ namespace EyeTrackingCore
                 return sector.Value;
             }
         }
+
+        public SectorEight Sector8
+        {
+            get
+            {
+                return sector8.Value;
+            }
+        }
+
 
         public Point From
         {
@@ -200,6 +223,71 @@ namespace EyeTrackingCore
                 result = Sector.Down;
             }
 
+            return result;
+        }
+
+        // direction is in radians.
+        private SectorEight CalculateSector8FromDirection(double direction)
+        {
+            SectorEight result = SectorEight.Right;
+
+
+            // get 45 degrees in radians
+            double degrees45inRadians = (45 * Math.PI) / 180;
+            double half45inRadians = (45 / 2 * Math.PI) / 180;
+            double negative360minusHalf45inRadians = ((360 - (45 / 2)) * Math.PI) / 180;
+
+
+            // Right
+            bool in360minus45over2 = direction >= negative360minusHalf45inRadians && direction < 2 * Math.PI;
+            bool in0to45over2 = direction >= 0 && direction < half45inRadians;
+            if (in360minus45over2 || in0to45over2)
+            {
+                result = SectorEight.Right;
+            }
+
+            // Up Right
+            if (direction >= half45inRadians && direction < half45inRadians + (degrees45inRadians * 1))
+            {
+                result = SectorEight.UpRight;
+            }
+
+            // Up
+            if (direction >= half45inRadians + (degrees45inRadians * 1) && direction < half45inRadians + (degrees45inRadians * 2))
+            {
+                result = SectorEight.Up;
+            }
+
+            // Up Left
+            if (direction >= half45inRadians + (degrees45inRadians * 2) && direction < half45inRadians + (degrees45inRadians * 3))
+            {
+                result = SectorEight.UpLeft;
+            }
+
+            // Left
+            if (direction >= half45inRadians + (degrees45inRadians * 3) && direction < half45inRadians + (degrees45inRadians * 4))
+            {
+                result = SectorEight.Left;
+            }
+
+            // Down Left
+            if (direction >= half45inRadians + (degrees45inRadians * 4) && direction < half45inRadians + (degrees45inRadians * 5))
+            {
+                result = SectorEight.DownLeft;
+            }
+
+            // Down
+            if (direction >= half45inRadians + (degrees45inRadians * 5) && direction < half45inRadians + (degrees45inRadians * 6))
+            {
+                result = SectorEight.Down;
+            }
+
+            // Down Right
+            if (direction >= half45inRadians + (degrees45inRadians * 6) && direction < half45inRadians + (degrees45inRadians * 7))
+            {
+                result = SectorEight.DownRight;
+            }
+            
             return result;
         }
 
