@@ -1,2 +1,0 @@
-- tracker kept losing eyes during coding 
-- evacuation alarm happened during the final activity (write function)
