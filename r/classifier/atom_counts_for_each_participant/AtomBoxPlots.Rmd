@@ -1,0 +1,118 @@
+---
+title: "Box Plots for Atoms over 30 second window."
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Box plots for atoms for all participants and then all participants combined.
+
+```{r boxplots, echo=FALSE, fig.width=12, fig.height=4}
+library(caret)
+library(e1071)
+require(ggplot2)
+
+# box plot test
+
+# Get the data
+##############
+
+directory <- "data_for_generation/"
+fileStart <- "participant"
+fileEndTrain <- "_train_"
+fileEndTest <- "_test_"
+windowSize <- "30s.csv"
+
+aggregatedTrainData <- data.frame()
+aggregatedTestData <- data.frame()
+
+for(i in c(1:9)) { 
+  
+  # Load the data for each file.
+  partipantNumber <- toString(i)
+  trainDataFile <- paste(directory, fileStart, partipantNumber, fileEndTrain, windowSize, sep="")
+  testDataFile <- paste(directory, fileStart, partipantNumber, fileEndTest, windowSize, sep="")
+  
+  trainData <- read.csv(trainDataFile)
+  testData <- read.csv(testDataFile)
+  
+  trainData <- trainData[, -c(6:8)] #no vsloc
+  testData <- testData[, -c(6:8)] #no vsloc
+  
+  combinedDataForParticipant <- rbind(trainData, testData)
+  
+  aggregatedTrainData <- rbind(aggregatedTrainData, trainData)
+  aggregatedTestData <- rbind(aggregatedTestData, testData)
+  
+  print(paste("Participant ", i, " - Atom Counts"))
+  
+  # Print a box plot for the atoms across this participant's data.
+  ################################################################
+  print(featurePlot(x = combinedDataForParticipant[, 29:30],
+                    y = combinedDataForParticipant$Activity,
+                    do.out = FALSE,
+                    notch = TRUE,
+                    plot = "box",
+                    auto.key = list(columns = 7)))
+  
+  print(featurePlot(x = combinedDataForParticipant[, 31:32],
+                    y = combinedDataForParticipant$Activity,
+                    do.out = FALSE,
+                    notch = TRUE,
+                    plot = "box",
+                    auto.key = list(columns = 7)))
+  
+  print(featurePlot(x = combinedDataForParticipant[, 33:34],
+                    y = combinedDataForParticipant$Activity,
+                    do.out = FALSE,
+                    notch = TRUE,
+                    plot = "box",
+                    auto.key = list(columns = 7)))
+}
+
+
+combinedAggregatedData <- rbind(aggregatedTrainData, aggregatedTestData)
+print("User independent - Atom Counts")
+# Print a box plot for the atoms across all of the training data.
+################################################################
+featurePlot(x = combinedAggregatedData[, 29:30],
+            y = combinedAggregatedData$Activity,
+            plot = "box",
+            do.out = FALSE,
+            notch = FALSE,
+            auto.key = list(columns = 7))
+
+featurePlot(x = combinedAggregatedData[, 31:32],
+            y = combinedAggregatedData$Activity,
+            plot = "box",
+            do.out = FALSE,
+            notch = FALSE,
+            auto.key = list(columns = 7))
+
+featurePlot(x = combinedAggregatedData[, 33:34],
+            y = combinedAggregatedData$Activity,
+            plot = "box",
+            do.out = FALSE,
+            notch = FALSE,
+            auto.key = list(columns = 7))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

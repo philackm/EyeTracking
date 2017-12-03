@@ -1,0 +1,158 @@
+---
+title: "EyeTracking Graphs - No VSLoc - Window Size: 30 Seconds"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## User independent confusions matrices (hold one out method)
+
+```{r confusion, echo=FALSE}
+library(caret)
+library(e1071)
+require(ggplot2)
+
+# Drawing functions.
+DrawPlotForConfusionMatrix <- function(titleString, m, columnNames) {
+  
+  normaliseVector <- function(vector) { vector / sqrt(sum(vector^2)) }
+  
+  for(i in 1:nrow(m)) {
+    m[,i] <- normaliseVector(m[,i])
+  }
+  
+  input.matrix <- data.matrix(m)
+  
+  colnames(input.matrix) <- c(columnNames)
+  rownames(input.matrix) <- c(columnNames)
+  
+  confusion <- as.data.frame(input.matrix)
+  # print(confusion)
+  
+  title <- titleString
+  plot <- ggplot(confusion)
+  plot + geom_tile(aes(x=Prediction, y=Reference, fill=Freq)) + scale_x_discrete(name="Predicted Class") + scale_y_discrete(name="Actual Class") + scale_fill_gradient(breaks=seq(from=0, to=1, by=.2)) + labs(fill="Normalized\nFrequency") + ggtitle(title)
+}
+
+# Get the data
+##############
+
+directory <- "data_for_generation/"
+fileStart <- "participant"
+fileEndTrain <- "_train_"
+fileEndTest <- "_test_"
+windowSize <- "30s.csv"
+
+aggregatedTrainData <- data.frame()
+aggregatedTestData <- data.frame()
+
+# User independent (hold one out method)
+participantNumbers <- c(1:9)
+
+for(heldout in participantNumbers) {
+  
+  # print(paste("Heldout ", heldout, sep=""))
+  
+  aggregatedTrainData <- data.frame()
+  aggregatedTestData <- data.frame()
+  
+  trainData <- data.frame()
+  testData <- data.frame()
+  
+  for(participantToAggregate in participantNumbers) {
+    if(!(heldout == participantToAggregate)) {
+      
+      #print(participantToAggregate)
+      
+      # Aggregate data for all these participants.
+      # Load the data for each file.
+      partipantNumber <- toString(participantToAggregate)
+      trainDataFile <- paste(directory, fileStart, partipantNumber, fileEndTrain, windowSize, sep="")
+      testDataFile <- paste(directory, fileStart, partipantNumber, fileEndTest, windowSize, sep="")
+      
+      trainData <- read.csv(trainDataFile)
+      testData <- read.csv(testDataFile)
+      
+      trainData <- trainData[, -c(6:8)] #no vsloc
+      testData <- testData[, -c(6:8)] #no vsloc
+      
+      #trainData <- trainData[, -c(32:37)] #no atoms
+      #testData <- testData[, -c(32:37)] #no atoms
+      
+      aggregatedTrainData <- rbind(aggregatedTrainData, trainData)
+      aggregatedTestData <- rbind(aggregatedTestData, testData)
+    }
+  }
+  
+  # For the aggregated data, build a classifier using 10-fold cross validation (Chooses the best model.)
+  ###################################################
+  
+  combinedDataForHeldout <- data.frame()
+  combinedAggregatedDataForTraining <- data.frame()
+  
+  heldoutNumber <- toString(heldout)
+  trainDataFile <- paste(directory, fileStart, heldoutNumber, fileEndTrain, windowSize, sep="")
+  testDataFile <- paste(directory, fileStart, heldoutNumber, fileEndTest, windowSize, sep="")
+  
+  trainData <- read.csv(trainDataFile)
+  testData <- read.csv(testDataFile)
+  
+  trainData <- trainData[, -c(6:8)] #no vsloc
+  testData <- testData[, -c(6:8)] #no vsloc
+  
+  #Because we are testing by holding one user out, we can use ALL the data we have for every other user.
+  combinedDataForHeldout <- rbind(trainData, testData)
+  combinedAggregatedDataForTraining <- rbind(aggregatedTrainData, aggregatedTestData)
+  
+  # Clean the data.
+  # Remove any rows that have an activity that is not in the heldout data.
+  # X[ ! X$Variable1 %in% c(11,12), ]
+  combinedAggregatedDataForTraining <- combinedAggregatedDataForTraining[combinedAggregatedDataForTraining$Activity %in% levels(combinedDataForHeldout$Activity),]
+  combinedAggregatedDataForTraining <- droplevels(combinedAggregatedDataForTraining)
+  
+  #combinedDataForHeldout <- combinedDataForHeldout[combinedDataForHeldout$Activity %in% levels(combinedAggregatedDataForTraining$Activity),]
+  
+  # Run algorithms using 10-fold cross validation to choose best model.
+  control <- trainControl(method="cv", number=10, verboseIter = FALSE)
+  metric <- "Accuracy"
+  
+  # Create a Random Forest classifier
+  set.seed(0)
+  classifier <- train(Activity~., data=combinedAggregatedDataForTraining, method="rf", metric=metric, trControl=control)
+  
+  ## Run the classifier on the data we held out before and show the confusion matrix
+  predictions <- predict(classifier, combinedDataForHeldout)
+  
+  # Change the order of the factors but only if they all exist.
+  if(length(levels(predictions)) >= 7) {
+    predictions <- factor(predictions, levels(predictions)[c(4, 6, 3, 5, 2, 1, 7)])
+    combinedDataForHeldout$Activity <- factor(combinedDataForHeldout$Activity, levels(combinedDataForHeldout$Activity)[c(4, 6, 3, 5, 2, 1, 7)])
+  }
+  
+  m <- confusionMatrix(predictions, combinedDataForHeldout$Activity)
+  
+  print(paste("Data for testing on participant", heldout, sep=" "))
+  print(m)
+  columnNames <- levels(predictions)
+  title <- paste("User Independent - Test on Participant", heldout, sep=" ")
+  print(DrawPlotForConfusionMatrix(title, m[["table"]], columnNames))
+  
+}
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
