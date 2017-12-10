@@ -4,7 +4,6 @@ READ: biscuits.pdf in adobe acrobat, full screen, left/right arrow keys to chang
 WATCH: https://vimeo.com/162709769 fullscreen
 SEARCH:search.pdf, open in adobe acrobat, alt tab between questions and browser, or open in another tab
 GAME: http://agar.io/
-WHITE NOISE: one minute of white noise for NULL case https://www.youtube.com/watch?v=t0I4mTEdAf8
 
 Low Level (Specific programming activities):
 

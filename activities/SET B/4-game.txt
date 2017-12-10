@@ -1,0 +1,1 @@
+http://supermarioemulator.com/mario.php (Runs well in Firefox)
