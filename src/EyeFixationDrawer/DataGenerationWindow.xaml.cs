@@ -88,7 +88,9 @@ namespace EyeFixationDrawer
                 {
                     try
                     {
-                        string className = filename.Split('_')[1].Split('.')[0].ToUpper();
+                        int numberOfParts = filename.Split('_').Length;
+                        string className = filename.Split('_')[numberOfParts - 1].Split('.')[0].ToUpper();
+
                         Data one = new Data(filename, className);
                         datum.Add(one);
                     }
@@ -123,27 +125,31 @@ namespace EyeFixationDrawer
                     bool includeNames = true;
 
                     // Add the slice time to the end of the filename. (We generate as many files as the needed with <saveFileName>_sliceTime.csv as the filename)
-                    string trainFileName = saveFileName.Insert(saveFileName.Length - 4, String.Format("_train_{0}s", sliceTime));
+                    string instancesFilename = saveFileName.Insert(saveFileName.Length - 4, String.Format("_instances_{0}s", sliceTime));
                     Console.WriteLine(sliceTime);
-                    Console.WriteLine(trainFileName);
+                    Console.WriteLine(instancesFilename);
 
+                    /*
                     string testFileName = saveFileName.Insert(saveFileName.Length - 4, String.Format("_test_{0}s", sliceTime));
                     Console.WriteLine(sliceTime);
                     Console.WriteLine(testFileName);
+                    */
 
                     // Setup the file stream writers.
-                    System.IO.FileStream trainFileStream = new System.IO.FileStream(trainFileName, System.IO.FileMode.Append);
+                    System.IO.FileStream trainFileStream = new System.IO.FileStream(instancesFilename, System.IO.FileMode.Append);
                     StreamWriter trainFileWriter = new StreamWriter(trainFileStream);
 
                     // Setup the file stream writers.
+                    /*
                     System.IO.FileStream testFileStream = new System.IO.FileStream(testFileName, System.IO.FileMode.Append);
                     StreamWriter testfileWriter = new StreamWriter(testFileStream);
+                    */
 
                     // Write the column names to the top 
                     if (includeNames)
                     {
                         WriteColumnNames(trainFileWriter, extractors);
-                        WriteColumnNames(testfileWriter, extractors);
+                        //WriteColumnNames(testfileWriter, extractors);
                     }
 
                     // We have the fileName to save the instances to, generate all the instances and then save them to the file at this location.
@@ -160,21 +166,22 @@ namespace EyeFixationDrawer
                         RawToFixationConverter converter = new RawToFixationConverter(gazePoints);
                         List<Fixation> fixations = converter.CalculateFixations((int)windowSize, (float)peakThreshold, (float)radius, 15000); // Clip 15 seconds of data on either side when generating the data.
 
-                        int seed = 0;
-                        double testPercentage = 0.3;
+                        
+                        //int seed = 0;
+                        //double testPercentage = 0.3;
                         
                         List<Slice> slices = SliceFixations(fixations, sliceTime * 1000, 1000); // convert sliceTime to milliseconds, set a window step size of 1000, therefore minimum window size is 1000.
-                        Tuple<List<Slice>, List<Slice>> trainTest = SplitSlicesIntoTrainAndTest(slices, seed, testPercentage);
+                        //Tuple<List<Slice>, List<Slice>> trainTest = SplitSlicesIntoTrainAndTest(slices, seed, testPercentage);
 
-                        List<Slice> trainSlices = trainTest.Item1;
-                        List<Slice> testSlices = trainTest.Item2;
+                        //List<Slice> trainSlices = trainTest.Item1;
+                        //List<Slice> testSlices = trainTest.Item2;
 
-                        WriteInstacesForSlicesToFile(trainSlices, sliceTime, trainFileWriter, dataFile.className);
-                        WriteInstacesForSlicesToFile(testSlices, sliceTime, testfileWriter, dataFile.className);
+                        WriteInstacesForSlicesToFile(slices, sliceTime, trainFileWriter, dataFile.className);
+                        //WriteInstacesForSlicesToFile(testSlices, sliceTime, testfileWriter, dataFile.className);
                     }
 
                     trainFileWriter.Close();
-                    testfileWriter.Close();
+                    //testfileWriter.Close();
                 }
             }
         }
