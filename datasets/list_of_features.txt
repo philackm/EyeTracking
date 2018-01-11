@@ -1,0 +1,82 @@
+List of Features
+
+1:  Fixation Duration (mean)
+2:  Fixation Duration (variance)
+3:  Fixation Duration (standard deviation)
+4:  Fixation Rate (per second)
+5:  Fixation Slope
+
+6:  NumberOfBriefFixations
+7:  NumberOfHoldFixations
+
+8:  NumberDistractionUp
+9:  NumberDistractionRight
+10: NumberDistractionDown
+11: NumberDistractionLeft
+
+12: Area Containing Fixations (75%)
+
+13: Saccade Size (mean)
+14: Saccade Size (variance)
+15: Saccade Size (standard deviation)
+
+// For each successive pair of saccades, how many had an opposite direction, how many had a neighbouring direction.
+16: Follow Direction Count
+17: Neighbouring Direction Count
+18: Opposite Direction Count
+
+// For the 8 sectors, how many saccades in each sector do we have?
+19: Sector8 Right Count
+20: Sector8 Up Count
+21: Sector8 Left Count
+22: Sector8 Down Count
+
+23: Sector8 UpRight Count
+24: Sector8 UpLeft
+25: Sector8 DownLeft
+26: Sector8 DownRight
+
+// Shape Based Patterns
+
+// The list of tokens define the pattern, 
+// for example, #31: MediumLine is the pattern defined by 4 short right saccades followed by a medium left saccade
+
+// String Patterns
+27: StringUp = new List<Token> { Token.ShortUp, Token.ShortUp, Token.ShortUp, Token.ShortUp },
+28: StringRight = new List<Token> { Token.ShortRight, Token.ShortRight, Token.ShortRight, Token.ShortRight },
+29: StringDown = new List<Token> { Token.ShortDown, Token.ShortDown, Token.ShortDown, Token.ShortDown },
+30: StringLeft = new List<Token> { Token.ShortLeft, Token.ShortLeft, Token.ShortLeft, Token.ShortLeft },
+
+// Line Patterns
+31: MediumLine = new List<Token> { Token.ShortRight, Token.ShortRight, Token.ShortRight, Token.ShortRight, Token.MediumLeft },
+32: LongLine = new List<Token> { Token.ShortRight, Token.ShortRight, Token.ShortRight, Token.ShortRight, Token.LongLeft },
+
+// Compare Patterns
+33: CompareHorizontal = new List<Token> { Token.ShortRight, Token.ShortLeft, Token.ShortRight, Token.ShortLeft },
+34: CompareVertical = new List<Token> { Token.ShortUp, Token.ShortDown, Token.ShortUp, Token.ShortDown },
+// Alt is the mirrored version. Right Left Right Left -> (alt version) Left Right Left Right
+35: CompareHorizontalAlt = new List<Token> { Token.ShortLeft, Token.ShortRight, Token.ShortLeft, Token.ShortRight },
+36: CompareVerticalAlt = new List<Token> { Token.ShortDown, Token.ShortUp, Token.ShortDown, Token.ShortUp},
+
+// Scanning Patterns
+37: ScanHorizontal = new List<Token> { Token.ShortRight, Token.ShortLeft, Token.ShortLeft, Token.ShortRight },
+38: ScanVertical = new List<Token> { Token.ShortUp, Token.ShortDown, Token.ShortDown, Token.ShortUp },
+39: ScanHorizontalAlt = new List<Token> { Token.ShortLeft, Token.ShortRight, Token.ShortRight, Token.ShortLeft },
+40: ScanVerticalAlt = new List<Token> { Token.ShortDown, Token.ShortUp, Token.ShortUp, Token.ShortDown },
+
+41: ScanRightUp = new List<Token> { Token.ShortRight, Token.ShortLeft, Token.ShortUp, Token.ShortDown },
+42: ScanRightUpAlt = new List<Token> { Token.ShortUp, Token.ShortDown, Token.ShortRight, Token.ShortLeft},
+
+43: ScanUpLeft = new List<Token> { Token.ShortUp, Token.ShortDown, Token.ShortLeft, Token.ShortRight },
+44: ScanUpLeftAlt = new List<Token> { Token.ShortLeft, Token.ShortRight, Token.ShortUp, Token.ShortDown },
+
+45: ScanLeftDown = new List<Token> { Token.ShortLeft, Token.ShortRight, Token.ShortDown, Token.ShortUp },
+46: ScanLeftDownAlt = new List<Token> { Token.ShortDown, Token.ShortUp, Token.ShortLeft, Token.ShortRight },
+
+47: ScanDownRight = new List<Token> { Token.ShortDown, Token.ShortUp, Token.ShortRight, Token.ShortLeft },
+48: ScanDownRightAlt = new List<Token> { Token.ShortRight, Token.ShortLeft, Token.ShortDown, Token.ShortUp }
+
+// Distance Based Patterns
+
+49: Number of Returns
+50: Number of Elsewheres
