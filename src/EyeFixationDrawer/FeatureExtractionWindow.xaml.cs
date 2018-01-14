@@ -29,6 +29,8 @@ namespace EyeFixationDrawer
     /// </summary>
     public partial class FeatureExtractionWindow : Window
     {
+        static public AtomBook patterns = null;
+
         private ObservableCollection<FixationFeatureExtractor> list = new ObservableCollection<FixationFeatureExtractor>();
         private List<Fixation> currentlyLoadedFixations;
         private List<Saccade> currentlyLoadedSaccades;
@@ -52,7 +54,7 @@ namespace EyeFixationDrawer
             List<FeatureExtractor> extractors = GetFeatures();
             parent.SetExtractors(extractors);
 
-               
+
         }
 
         public enum RequiredData
@@ -99,9 +101,9 @@ namespace EyeFixationDrawer
             items.Add(new FixationFeatureExtractor() { featureName = "Fixation Rate (per second)", include = true, action = FixationRatePerSecond });
             items.Add(new FixationFeatureExtractor() { featureName = "Fixation Slope", include = true, action = FixationSlope });
 
-            items.Add(new FixationFeatureExtractor() { featureName = "Number of VSEditor Fixations", include = true, action = NumberOfEditorFixations });
-            items.Add(new FixationFeatureExtractor() { featureName = "Number of VSExplorer Fixations", include = true, action = NumberOfSolutionExplorerFixations });
-            items.Add(new FixationFeatureExtractor() { featureName = "Number of VSOutput Fixations", include = true, action = NumberOfOutputFixations });
+            items.Add(new FixationFeatureExtractor() { featureName = "Number of VSEditor Fixations", include = false, action = NumberOfEditorFixations });
+            items.Add(new FixationFeatureExtractor() { featureName = "Number of VSExplorer Fixations", include = false, action = NumberOfSolutionExplorerFixations });
+            items.Add(new FixationFeatureExtractor() { featureName = "Number of VSOutput Fixations", include = false, action = NumberOfOutputFixations });
 
             items.Add(new FixationFeatureExtractor() { featureName = "NumberOfBriefFixations", include = true, action = NumberOfBriefFixations });
             items.Add(new FixationFeatureExtractor() { featureName = "NumberOfHoldFixations", include = true, action = NumberOfHoldFixations });
@@ -116,8 +118,8 @@ namespace EyeFixationDrawer
             items.Add(new FixationFeatureExtractor() { featureName = "DistractionLeft", include = true, action = DistractionLeft });
 
             items.Add(new FixationFeatureExtractor() { featureName = "Area Containing Fixations (75%)", include = true, action = AreaContainingFixations75 });
-            items.Add(new FixationFeatureExtractor() { featureName = "Area Containing Fixations (50%)", include = true, action = AreaContainingFixations50 });
-            items.Add(new FixationFeatureExtractor() { featureName = "Area Containing Fixations (25%)", include = true, action = AreaContainingFixations25 });
+            items.Add(new FixationFeatureExtractor() { featureName = "Area Containing Fixations (50%)", include = false, action = AreaContainingFixations50 });
+            items.Add(new FixationFeatureExtractor() { featureName = "Area Containing Fixations (25%)", include = false, action = AreaContainingFixations25 });
 
             // Saccade related features.
             items.Add(new SaccadeFeatureExtractor() { featureName = "Saccade Size (mean)", include = true, action = SaccadeSizeMean });
@@ -165,11 +167,54 @@ namespace EyeFixationDrawer
 
             // Blink related features.
 
-            // Atoms
-            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of Strings", include = true, action = NumberOfStrings });
-            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of Lines", include = true, action = NumberOfLines });
-            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of Comparisons", include = true, action = NumberOfComparisons });
-            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of Scans", include = true, action = NumberOfScans });
+
+
+            // Patterns
+
+            // strings
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of StringUp", include = true, action = NumberOfStringUp });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of StringRight", include = true, action = NumberOfStringRight });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of StringDown", include = true, action = NumberOfStringDown });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of StringLeft", include = true, action = NumberOfStringLeft });
+
+            // lines
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of LongLines", include = true, action = NumberOfMediumLines });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of MediumLines", include = true, action = NumberOfLongLines });
+
+            // comparisons
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of CompareHorizontal", include = true, action = NumberOfCompareHorizontal});
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of CompareVertical", include = true, action = NumberOfCompareVertical });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of CompareHorizontalAlt", include = true, action = NumberOfCompareHorizontalAlt });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of CompareVerticalAlt", include = true, action = NumberOfCompareVerticalAlt });
+
+            // scanning
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of ScanHorizontal", include = true, action = NumberOfScanHorizontal });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of ScanVertical", include = true, action = NumberOfScanVertical });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of ScanHorizontalAlt", include = true, action = NumberOfScanHorizontalAlt });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of ScanVerticalAlt", include = true, action = NumberOfScanVerticalAlt });
+
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of ScanRightUp", include = true, action = NumberOfScanRightUp});
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of ScanRightUpAlt", include = true, action = NumberOfScanRightUpAlt });
+
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of ScanUpLeft", include = true, action = NumberOfScanUpLeft});
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of ScanUpLeftAlt", include = true, action = NumberOfScanUpLeftAlt});
+
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of ScanLeftDown", include = true, action = NumberOfScanLeftDown });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of ScanLeftDownAlt", include = true, action = NumberOfScanLeftDownAlt});
+
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of ScanDownRight", include = true, action = NumberOfScanDownRight });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of ScanDownRightAlt", include = true, action = NumberOfScanDownRightAlt });
+
+
+
+
+
+
+
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of Strings", include = false, action = NumberOfStrings });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of Lines", include = false, action = NumberOfLines });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of Comparisons", include = false, action = NumberOfComparisons });
+            items.Add(new SaccadeFeatureExtractor() { featureName = "Number of Scans", include = false, action = NumberOfScans });
 
             // Distance based atoms.
             items.Add(new FixationFeatureExtractor() { featureName = "Number of Returns", include = true, action = NumberOfReturns });
@@ -188,7 +233,7 @@ namespace EyeFixationDrawer
                 Console.Write(item.featureName + ": ");
                 Console.WriteLine(item.include);
 
-                if(item.include)
+                if (item.include)
                 {
                     featuresToExtract.Add(item);
                 }
@@ -196,7 +241,7 @@ namespace EyeFixationDrawer
 
             return featuresToExtract;
         }
-        
+
         // Features extracted from fixations
         // #################################
         private double FixationDurationMean(List<Fixation> fixations)
@@ -253,7 +298,7 @@ namespace EyeFixationDrawer
                 samples.Add(sample);
             }
 
-            if(samples.Count >= 2)
+            if (samples.Count >= 2)
             {
                 Tuple<double, double> result = SimpleRegression.Fit(samples);
                 return result.Item2;
@@ -323,7 +368,7 @@ namespace EyeFixationDrawer
 
             // get lengths from centre to each fixation and sort them
             var distances = DistancesFromPointToOtherPoints(centre, fixations);
-            distances.Sort((x,y) => x.Item2.CompareTo(y.Item2));
+            distances.Sort((x, y) => x.Item2.CompareTo(y.Item2));
 
             // drop the fixations that were in the top 10% of
             int numToDrop = (int)(distances.Count * percentToDrop);
@@ -366,7 +411,7 @@ namespace EyeFixationDrawer
             double xSum = 0;
             double ySum = 0;
 
-            foreach(Fixation fixation in fixations)
+            foreach (Fixation fixation in fixations)
             {
                 xSum += fixation.x;
                 ySum += fixation.y;
@@ -382,7 +427,7 @@ namespace EyeFixationDrawer
         {
             List<Tuple<int, double>> indexDistanceList = new List<Tuple<int, double>>();
 
-            for(int i = 0; i < fixations.Count; i++)
+            for (int i = 0; i < fixations.Count; i++)
             {
                 Fixation fixation = fixations[i];
 
@@ -413,13 +458,13 @@ namespace EyeFixationDrawer
             {
                 return (left + right) * (top + bottom);
             }
-            
+
             public void IncreaseRectSizeToContainPoint(double x, double y)
             {
                 Tuple<Double, Double> xRange = GetXRange();
                 Tuple<Double, Double> yRange = GetYRange();
-                
-                if(!InRange(x, xRange))
+
+                if (!InRange(x, xRange))
                 {
                     // the point is outside the x range.
                     // have to increase the width of the rect to encompass it
@@ -581,7 +626,7 @@ namespace EyeFixationDrawer
             // key is 0 through 35
             // value is the count for that bucket
             Dictionary<int, int> counts = CSVGenerator.CalculateDirectionCounts(currentlyLoadedSaccades.ToArray());
-            
+
             return 0;
         }
 
@@ -689,6 +734,282 @@ namespace EyeFixationDrawer
         // wordbook features
         // #################
 
+
+        private double NumberOfStringUp(List<Saccade> saccades)
+        {
+            if (patterns == null)
+            {
+                Wordbook saccadeBook = new Wordbook(saccades);
+                AtomBook atomBook = new AtomBook(saccadeBook);
+                patterns = atomBook;
+            }
+
+            return patterns.numberOfStringUp;
+        }
+
+        private double NumberOfStringRight(List<Saccade> saccades)
+        {
+            if (patterns == null)
+            {
+                Wordbook saccadeBook = new Wordbook(saccades);
+                AtomBook atomBook = new AtomBook(saccadeBook);
+                patterns = atomBook;
+            }
+
+            return patterns.numberOfStringRight;
+        }
+
+        private double NumberOfStringDown(List<Saccade> saccades)
+        {
+            if (patterns == null)
+            {
+                Wordbook saccadeBook = new Wordbook(saccades);
+                AtomBook atomBook = new AtomBook(saccadeBook);
+                patterns = atomBook;
+            }
+
+            return patterns.numberOfStringDown;
+        }
+
+        private double NumberOfStringLeft(List<Saccade> saccades)
+        {
+            if (patterns == null)
+            {
+                Wordbook saccadeBook = new Wordbook(saccades);
+                AtomBook atomBook = new AtomBook(saccadeBook);
+                patterns = atomBook;
+            }
+
+            return patterns.numberOfStringLeft;
+        }
+
+        // Lines
+
+        private double NumberOfMediumLines(List<Saccade> saccades)
+        {
+            if (patterns == null)
+            {
+                Wordbook saccadeBook = new Wordbook(saccades);
+                AtomBook atomBook = new AtomBook(saccadeBook);
+                patterns = atomBook;
+            }
+
+            return patterns.numberOfMediumLines;
+        }
+
+        private double NumberOfLongLines(List<Saccade> saccades)
+        {
+            if (patterns == null)
+            {
+                Wordbook saccadeBook = new Wordbook(saccades);
+                AtomBook atomBook = new AtomBook(saccadeBook);
+                patterns = atomBook;
+            }
+
+            return patterns.numberOfLongLines;
+        }
+
+        // Compares
+
+        private double NumberOfCompareHorizontal(List<Saccade> saccades)
+        {
+            if (patterns == null)
+            {
+                Wordbook saccadeBook = new Wordbook(saccades);
+                AtomBook atomBook = new AtomBook(saccadeBook);
+                patterns = atomBook;
+            }
+
+            return patterns.numberOfCompareHorizontal;
+        }
+
+        private double NumberOfCompareVertical(List<Saccade> saccades)
+        {
+            if (patterns == null)
+            {
+                Wordbook saccadeBook = new Wordbook(saccades);
+                AtomBook atomBook = new AtomBook(saccadeBook);
+                patterns = atomBook;
+            }
+
+            return patterns.numberOfCompareVertical;
+        }
+
+        private double NumberOfCompareHorizontalAlt(List<Saccade> saccades)
+        {
+            if (patterns == null)
+            {
+                Wordbook saccadeBook = new Wordbook(saccades);
+                AtomBook atomBook = new AtomBook(saccadeBook);
+                patterns = atomBook;
+            }
+
+            return patterns.numberOfCompareHorizontalAlt;
+        }
+
+        private double NumberOfCompareVerticalAlt(List<Saccade> saccades)
+        {
+            if (patterns == null)
+            {
+                Wordbook saccadeBook = new Wordbook(saccades);
+                AtomBook atomBook = new AtomBook(saccadeBook);
+                patterns = atomBook;
+            }
+
+            return patterns.numberOfCompareVerticalAlt;
+        }
+
+        // Scans
+
+        private double NumberOfScanRightUp(List<Saccade> saccades)
+        {
+            if (patterns == null)
+            {
+                Wordbook saccadeBook = new Wordbook(saccades);
+                AtomBook atomBook = new AtomBook(saccadeBook);
+                patterns = atomBook;
+            }
+
+            return patterns.numberOfScanRightUp;
+        }
+
+        private double NumberOfScanUpLeft(List<Saccade> saccades)
+        {
+            if (patterns == null)
+            {
+                Wordbook saccadeBook = new Wordbook(saccades);
+                AtomBook atomBook = new AtomBook(saccadeBook);
+                patterns = atomBook;
+            }
+
+            return patterns.numberOfScanUpLeft;
+        }
+
+        private double NumberOfScanLeftDown(List<Saccade> saccades)
+        {
+            if (patterns == null)
+            {
+                Wordbook saccadeBook = new Wordbook(saccades);
+                AtomBook atomBook = new AtomBook(saccadeBook);
+                patterns = atomBook;
+            }
+
+            return patterns.numberOfScanLeftDown;
+        }
+
+        private double NumberOfScanDownRight(List<Saccade> saccades)
+        {
+            if (patterns == null)
+            {
+                Wordbook saccadeBook = new Wordbook(saccades);
+                AtomBook atomBook = new AtomBook(saccadeBook);
+                patterns = atomBook;
+            }
+
+            return patterns.numberOfScanDownRight;
+        }
+
+        private double NumberOfScanRightUpAlt(List<Saccade> saccades)
+        {
+            if (patterns == null)
+            {
+                Wordbook saccadeBook = new Wordbook(saccades);
+                AtomBook atomBook = new AtomBook(saccadeBook);
+                patterns = atomBook;
+            }
+
+            return patterns.numberOfScanRightUpAlt;
+        }
+
+        private double NumberOfScanUpLeftAlt(List<Saccade> saccades)
+        {
+            if (patterns == null)
+            {
+                Wordbook saccadeBook = new Wordbook(saccades);
+                AtomBook atomBook = new AtomBook(saccadeBook);
+                patterns = atomBook;
+            }
+
+            return patterns.numberOfScanUpLeftAlt;
+        }
+
+        private double NumberOfScanLeftDownAlt(List<Saccade> saccades)
+        {
+            if (patterns == null)
+            {
+                Wordbook saccadeBook = new Wordbook(saccades);
+                AtomBook atomBook = new AtomBook(saccadeBook);
+                patterns = atomBook;
+            }
+
+            return patterns.numberOfScanLeftDownAlt;
+        }
+
+        private double NumberOfScanDownRightAlt(List<Saccade> saccades)
+        {
+            if (patterns == null)
+            {
+                Wordbook saccadeBook = new Wordbook(saccades);
+                AtomBook atomBook = new AtomBook(saccadeBook);
+                patterns = atomBook;
+            }
+
+            return patterns.numberOfScanDownRightAlt;
+        }
+
+        private double NumberOfScanHorizontal(List<Saccade> saccades)
+        {
+            if (patterns == null)
+            {
+                Wordbook saccadeBook = new Wordbook(saccades);
+                AtomBook atomBook = new AtomBook(saccadeBook);
+                patterns = atomBook;
+            }
+
+            return patterns.numberOfScanHorizontal;
+        }
+
+        private double NumberOfScanVertical(List<Saccade> saccades)
+        {
+            if (patterns == null)
+            {
+                Wordbook saccadeBook = new Wordbook(saccades);
+                AtomBook atomBook = new AtomBook(saccadeBook);
+                patterns = atomBook;
+            }
+
+            return patterns.numberOfScanVertical;
+        }
+
+        private double NumberOfScanHorizontalAlt(List<Saccade> saccades)
+        {
+            if (patterns == null)
+            {
+                Wordbook saccadeBook = new Wordbook(saccades);
+                AtomBook atomBook = new AtomBook(saccadeBook);
+                patterns = atomBook;
+            }
+
+            return patterns.numberOfScanHorizontalAlt;
+        }
+
+        private double NumberOfScanVerticalAlt(List<Saccade> saccades)
+        {
+            if (patterns == null)
+            {
+                Wordbook saccadeBook = new Wordbook(saccades);
+                AtomBook atomBook = new AtomBook(saccadeBook);
+                patterns = atomBook;
+            }
+
+            return patterns.numberOfScanVerticalAlt;
+        }
+
+
+
+
+
+        // old
         private double NumberOfStrings(List<Saccade> saccades)
         {
             Wordbook saccadeBook = new Wordbook(saccades);

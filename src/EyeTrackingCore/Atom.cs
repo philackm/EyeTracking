@@ -12,6 +12,41 @@ namespace EyeTrackingCore
     public class AtomBook
     {
         private Wordbook wordbook;
+
+        // Strings
+        public int numberOfStringUp = 0;
+        public int numberOfStringRight = 0;
+        public int numberOfStringDown = 0;
+        public int numberOfStringLeft = 0;
+        
+        // Lines
+        public int numberOfMediumLines = 0;
+        public int numberOfLongLines = 0;
+
+        // Compares
+        public int numberOfCompareHorizontal = 0;
+        public int numberOfCompareVertical = 0;
+        public int numberOfCompareHorizontalAlt = 0;
+        public int numberOfCompareVerticalAlt = 0;
+        
+        // Scans
+        public int numberOfScanRightUp = 0;
+        public int numberOfScanUpLeft = 0;
+        public int numberOfScanLeftDown = 0;
+        public int numberOfScanDownRight = 0;
+        public int numberOfScanRightUpAlt = 0;
+        public int numberOfScanUpLeftAlt = 0;
+        public int numberOfScanLeftDownAlt = 0;
+        public int numberOfScanDownRightAlt = 0;
+        
+        public int numberOfScanHorizontal = 0;
+        public int numberOfScanVertical = 0;
+        public int numberOfScanHorizontalAlt = 0;
+        public int numberOfScanVerticalAlt = 0;
+
+
+
+
         private int numberOfScans = 0;
         private int numberOfStrings = 0;
         private int numberOfComparisons = 0;
@@ -34,6 +69,34 @@ namespace EyeTrackingCore
             this.numberOfLines = FindAtoms(LineTypes);
             this.numberOfComparisons = FindAtoms(ComparisonTypes);
             this.numberOfScans = FindAtoms(ScanningTypes);
+
+            // Strings
+            numberOfStringUp = FindAtoms(new AtomType[] { AtomType.StringUp });
+            numberOfStringRight = FindAtoms(new AtomType[] { AtomType.StringRight }); ;
+            numberOfStringDown = FindAtoms(new AtomType[] { AtomType.StringDown }); ;
+            numberOfStringLeft = FindAtoms(new AtomType[] { AtomType.StringLeft }); ;
+            
+            numberOfMediumLines = FindAtoms(new AtomType[] { AtomType.MediumLine }); ;
+            numberOfLongLines = FindAtoms(new AtomType[] { AtomType.LongLine }); ;
+            
+            numberOfCompareHorizontal = FindAtoms(new AtomType[] { AtomType.CompareHorizontal }); ;
+            numberOfCompareVertical = FindAtoms(new AtomType[] { AtomType.CompareVertical }); ;
+            numberOfCompareHorizontalAlt = FindAtoms(new AtomType[] { AtomType.CompareHorizontalAlt }); ;
+            numberOfCompareVerticalAlt = FindAtoms(new AtomType[] { AtomType.CompareVerticalAlt }); ;
+            
+            numberOfScanRightUp = FindAtoms(new AtomType[] { AtomType.ScanRightUp }); ;
+            numberOfScanUpLeft = FindAtoms(new AtomType[] { AtomType.ScanUpLeft }); ;
+            numberOfScanLeftDown = FindAtoms(new AtomType[] { AtomType.ScanLeftDown }); ;
+            numberOfScanDownRight = FindAtoms(new AtomType[] { AtomType.ScanDownRight }); ;
+            numberOfScanRightUpAlt = FindAtoms(new AtomType[] { AtomType.ScanRightUpAlt }); ;
+            numberOfScanUpLeftAlt = FindAtoms(new AtomType[] { AtomType.ScanUpLeftAlt }); ;
+            numberOfScanLeftDownAlt = FindAtoms(new AtomType[] { AtomType.ScanLeftDownAlt }); ;
+            numberOfScanDownRightAlt = FindAtoms(new AtomType[] { AtomType.ScanDownRightAlt }); ;
+
+            numberOfScanHorizontal = FindAtoms(new AtomType[] { AtomType.ScanHorizontal }); ;
+            numberOfScanVertical = FindAtoms(new AtomType[] { AtomType.ScanVertical }); ;
+            numberOfScanHorizontalAlt = FindAtoms(new AtomType[] { AtomType.ScanHorizontalAlt }); ;
+            numberOfScanVerticalAlt = FindAtoms(new AtomType[] { AtomType.ScanVerticalAlt }); ;
         }
 
         // Stores atoms it finds in the 'atoms' dictionary under its type and returns the total number of atoms it found.
