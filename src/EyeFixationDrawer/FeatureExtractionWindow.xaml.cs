@@ -734,52 +734,26 @@ namespace EyeFixationDrawer
         // wordbook features
         // #################
 
+        // MAKE SURE the static paterns variable iscalculated for each slice in DataGenerationWindow
+        // before trying to count the number of patterns.
 
         private double NumberOfStringUp(List<Saccade> saccades)
         {
-            if (patterns == null)
-            {
-                Wordbook saccadeBook = new Wordbook(saccades);
-                AtomBook atomBook = new AtomBook(saccadeBook);
-                patterns = atomBook;
-            }
-
             return patterns.numberOfStringUp;
         }
 
         private double NumberOfStringRight(List<Saccade> saccades)
         {
-            if (patterns == null)
-            {
-                Wordbook saccadeBook = new Wordbook(saccades);
-                AtomBook atomBook = new AtomBook(saccadeBook);
-                patterns = atomBook;
-            }
-
             return patterns.numberOfStringRight;
         }
 
         private double NumberOfStringDown(List<Saccade> saccades)
         {
-            if (patterns == null)
-            {
-                Wordbook saccadeBook = new Wordbook(saccades);
-                AtomBook atomBook = new AtomBook(saccadeBook);
-                patterns = atomBook;
-            }
-
             return patterns.numberOfStringDown;
         }
 
         private double NumberOfStringLeft(List<Saccade> saccades)
         {
-            if (patterns == null)
-            {
-                Wordbook saccadeBook = new Wordbook(saccades);
-                AtomBook atomBook = new AtomBook(saccadeBook);
-                patterns = atomBook;
-            }
-
             return patterns.numberOfStringLeft;
         }
 
@@ -787,25 +761,11 @@ namespace EyeFixationDrawer
 
         private double NumberOfMediumLines(List<Saccade> saccades)
         {
-            if (patterns == null)
-            {
-                Wordbook saccadeBook = new Wordbook(saccades);
-                AtomBook atomBook = new AtomBook(saccadeBook);
-                patterns = atomBook;
-            }
-
             return patterns.numberOfMediumLines;
         }
 
         private double NumberOfLongLines(List<Saccade> saccades)
         {
-            if (patterns == null)
-            {
-                Wordbook saccadeBook = new Wordbook(saccades);
-                AtomBook atomBook = new AtomBook(saccadeBook);
-                patterns = atomBook;
-            }
-
             return patterns.numberOfLongLines;
         }
 
@@ -813,49 +773,21 @@ namespace EyeFixationDrawer
 
         private double NumberOfCompareHorizontal(List<Saccade> saccades)
         {
-            if (patterns == null)
-            {
-                Wordbook saccadeBook = new Wordbook(saccades);
-                AtomBook atomBook = new AtomBook(saccadeBook);
-                patterns = atomBook;
-            }
-
             return patterns.numberOfCompareHorizontal;
         }
 
         private double NumberOfCompareVertical(List<Saccade> saccades)
         {
-            if (patterns == null)
-            {
-                Wordbook saccadeBook = new Wordbook(saccades);
-                AtomBook atomBook = new AtomBook(saccadeBook);
-                patterns = atomBook;
-            }
-
             return patterns.numberOfCompareVertical;
         }
 
         private double NumberOfCompareHorizontalAlt(List<Saccade> saccades)
         {
-            if (patterns == null)
-            {
-                Wordbook saccadeBook = new Wordbook(saccades);
-                AtomBook atomBook = new AtomBook(saccadeBook);
-                patterns = atomBook;
-            }
-
             return patterns.numberOfCompareHorizontalAlt;
         }
 
         private double NumberOfCompareVerticalAlt(List<Saccade> saccades)
         {
-            if (patterns == null)
-            {
-                Wordbook saccadeBook = new Wordbook(saccades);
-                AtomBook atomBook = new AtomBook(saccadeBook);
-                patterns = atomBook;
-            }
-
             return patterns.numberOfCompareVerticalAlt;
         }
 
@@ -863,145 +795,61 @@ namespace EyeFixationDrawer
 
         private double NumberOfScanRightUp(List<Saccade> saccades)
         {
-            if (patterns == null)
-            {
-                Wordbook saccadeBook = new Wordbook(saccades);
-                AtomBook atomBook = new AtomBook(saccadeBook);
-                patterns = atomBook;
-            }
-
             return patterns.numberOfScanRightUp;
         }
 
         private double NumberOfScanUpLeft(List<Saccade> saccades)
         {
-            if (patterns == null)
-            {
-                Wordbook saccadeBook = new Wordbook(saccades);
-                AtomBook atomBook = new AtomBook(saccadeBook);
-                patterns = atomBook;
-            }
-
             return patterns.numberOfScanUpLeft;
         }
 
         private double NumberOfScanLeftDown(List<Saccade> saccades)
         {
-            if (patterns == null)
-            {
-                Wordbook saccadeBook = new Wordbook(saccades);
-                AtomBook atomBook = new AtomBook(saccadeBook);
-                patterns = atomBook;
-            }
-
             return patterns.numberOfScanLeftDown;
         }
 
         private double NumberOfScanDownRight(List<Saccade> saccades)
         {
-            if (patterns == null)
-            {
-                Wordbook saccadeBook = new Wordbook(saccades);
-                AtomBook atomBook = new AtomBook(saccadeBook);
-                patterns = atomBook;
-            }
-
             return patterns.numberOfScanDownRight;
         }
 
         private double NumberOfScanRightUpAlt(List<Saccade> saccades)
         {
-            if (patterns == null)
-            {
-                Wordbook saccadeBook = new Wordbook(saccades);
-                AtomBook atomBook = new AtomBook(saccadeBook);
-                patterns = atomBook;
-            }
-
             return patterns.numberOfScanRightUpAlt;
         }
 
         private double NumberOfScanUpLeftAlt(List<Saccade> saccades)
         {
-            if (patterns == null)
-            {
-                Wordbook saccadeBook = new Wordbook(saccades);
-                AtomBook atomBook = new AtomBook(saccadeBook);
-                patterns = atomBook;
-            }
-
             return patterns.numberOfScanUpLeftAlt;
         }
 
         private double NumberOfScanLeftDownAlt(List<Saccade> saccades)
         {
-            if (patterns == null)
-            {
-                Wordbook saccadeBook = new Wordbook(saccades);
-                AtomBook atomBook = new AtomBook(saccadeBook);
-                patterns = atomBook;
-            }
-
             return patterns.numberOfScanLeftDownAlt;
         }
 
         private double NumberOfScanDownRightAlt(List<Saccade> saccades)
         {
-            if (patterns == null)
-            {
-                Wordbook saccadeBook = new Wordbook(saccades);
-                AtomBook atomBook = new AtomBook(saccadeBook);
-                patterns = atomBook;
-            }
-
             return patterns.numberOfScanDownRightAlt;
         }
 
         private double NumberOfScanHorizontal(List<Saccade> saccades)
         {
-            if (patterns == null)
-            {
-                Wordbook saccadeBook = new Wordbook(saccades);
-                AtomBook atomBook = new AtomBook(saccadeBook);
-                patterns = atomBook;
-            }
-
             return patterns.numberOfScanHorizontal;
         }
 
         private double NumberOfScanVertical(List<Saccade> saccades)
         {
-            if (patterns == null)
-            {
-                Wordbook saccadeBook = new Wordbook(saccades);
-                AtomBook atomBook = new AtomBook(saccadeBook);
-                patterns = atomBook;
-            }
-
             return patterns.numberOfScanVertical;
         }
 
         private double NumberOfScanHorizontalAlt(List<Saccade> saccades)
         {
-            if (patterns == null)
-            {
-                Wordbook saccadeBook = new Wordbook(saccades);
-                AtomBook atomBook = new AtomBook(saccadeBook);
-                patterns = atomBook;
-            }
-
             return patterns.numberOfScanHorizontalAlt;
         }
 
         private double NumberOfScanVerticalAlt(List<Saccade> saccades)
         {
-            if (patterns == null)
-            {
-                Wordbook saccadeBook = new Wordbook(saccades);
-                AtomBook atomBook = new AtomBook(saccadeBook);
-                patterns = atomBook;
-            }
-
             return patterns.numberOfScanVerticalAlt;
         }
 

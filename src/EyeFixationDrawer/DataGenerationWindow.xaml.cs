@@ -240,6 +240,10 @@ namespace EyeFixationDrawer
 
             foreach (Slice slice in slices)
             {
+                Wordbook saccadeBook = new Wordbook(slice.saccades);
+                AtomBook atomBook = new AtomBook(saccadeBook);
+                FeatureExtractionWindow.patterns = atomBook;
+
                 foreach (var extractor in extractors)
                 {
                     switch (extractor.DataType())
