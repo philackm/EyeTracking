@@ -192,8 +192,14 @@ namespace EyeFixationDrawer
 
             sliceLengths.Add(15, checkBox15s.IsChecked.Value);
             sliceLengths.Add(30, checkBox30s.IsChecked.Value);
+            sliceLengths.Add(45, checkBox45s.IsChecked.Value);
             sliceLengths.Add(60, checkBox60s.IsChecked.Value);
+            sliceLengths.Add(75, checkBox75s.IsChecked.Value);
             sliceLengths.Add(90, checkBox90s.IsChecked.Value);
+            sliceLengths.Add(105, checkBox105s.IsChecked.Value);
+            sliceLengths.Add(120, checkBox120s.IsChecked.Value);
+            sliceLengths.Add(135, checkBox135s.IsChecked.Value);
+            sliceLengths.Add(150, checkBox150s.IsChecked.Value);
 
             // Only return an array of the keys of the ones that are actually checked.
             return sliceLengths.Where(kvp => kvp.Value).ToDictionary(i => i.Key, i => i.Value).Keys.ToArray();
